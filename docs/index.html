@@ -1,4 +1,3 @@
-cat > docs/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,27 +6,25 @@ cat > docs/index.html <<'EOF'
 <title>Space Weather Risk Dashboard</title>
 <style>
 * { box-sizing: border-box; }
-
 body {
   margin: 0;
   background: #02070d;
   color: #eaf2ff;
-  font-family: Inter, Arial, sans-serif;
+  font-family: Inter, system-ui, Arial, sans-serif;
   overflow: hidden;
+  height: 100vh;
 }
-
 canvas {
   position: fixed;
   inset: 0;
   z-index: 1;
 }
-
 .panel {
-  background: rgba(4, 14, 25, 0.82);
+  background: rgba(4, 14, 25, 0.85);
   border: 1px solid rgba(135, 170, 205, 0.28);
   border-radius: 10px;
   backdrop-filter: blur(14px);
-  box-shadow: 0 20px 80px rgba(0,0,0,.35);
+  box-shadow: 0 20px 80px rgba(0,0,0,.4);
 }
 
 .top {
@@ -35,239 +32,228 @@ canvas {
   top: 14px;
   left: 14px;
   right: 14px;
-  height: 112px;
+  height: 108px;
   z-index: 5;
   display: grid;
   grid-template-columns: 1.45fr repeat(7, 1fr);
+  gap: 2px;
 }
-
 .kpi {
-  padding: 18px 22px;
+  padding: 14px 18px;
   border-right: 1px solid rgba(135,170,205,.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-
 .kpi:last-child { border-right: 0; }
-
 .label {
   color: #a7b5c6;
-  font-size: 12px;
+  font-size: 11.5px;
   letter-spacing: .12em;
   text-transform: uppercase;
+  font-weight: 500;
 }
-
 .value {
-  margin-top: 12px;
-  font-size: 30px;
-  font-weight: 800;
-}
-
-.small {
   margin-top: 8px;
-  color: #9aaabc;
-  font-size: 13px;
+  font-size: 29px;
+  font-weight: 800;
+  line-height: 1;
 }
-
+.small {
+  margin-top: 6px;
+  color: #9aaabc;
+  font-size: 12.5px;
+}
 .green { color: #56d28a; }
 .orange { color: #ff8a2a; }
 .red { color: #ff5252; }
 
-.title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: .04em;
-}
-
-.subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #aab8c8;
-}
-
 .side {
   position: fixed;
   right: 14px;
-  top: 142px;
-  width: 350px;
-  height: 560px;
+  top: 138px;
+  width: 355px;
+  height: calc(100vh - 280px);
   z-index: 5;
   padding: 22px;
+  overflow-y: auto;
 }
-
 .side h2 {
-  margin: 0 0 22px;
-  font-size: 18px;
+  margin: 0 0 18px;
+  font-size: 19px;
   letter-spacing: .04em;
 }
-
 .sat-img {
-  height: 95px;
-  margin: 18px 0 24px;
+  height: 110px;
+  margin: 20px 0 28px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .sat-body {
-  width: 46px;
-  height: 36px;
-  background: #eee;
+  width: 52px;
+  height: 38px;
+  background: #ddd;
   position: relative;
-  transform: rotate(-12deg);
+  transform: rotate(-10deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,.6);
 }
-
 .sat-body:before,
 .sat-body:after {
   content: "";
   position: absolute;
-  top: 8px;
-  width: 84px;
-  height: 20px;
+  top: 9px;
+  width: 92px;
+  height: 21px;
   background: linear-gradient(90deg, #6f8299, #c6d7eb, #44566e);
 }
-
-.sat-body:before { right: 52px; }
-.sat-body:after { left: 52px; }
+.sat-body:before { right: -48px; }
+.sat-body:after { left: -48px; }
 
 .rows div {
   display: flex;
   justify-content: space-between;
-  padding: 11px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(135,170,205,.18);
   color: #b5c4d5;
+  font-size: 13.5px;
 }
-
-.rows strong { color: white; }
+.rows strong { color: white; font-weight: 600; }
 
 .bottom {
   position: fixed;
   left: 14px;
-  right: 14px;
+  right: 380px;
   bottom: 14px;
   z-index: 5;
   display: grid;
-  grid-template-columns: 1fr .86fr;
+  grid-template-columns: 1fr 300px;
   gap: 14px;
 }
-
 .charts {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
-
 .chart {
-  height: 165px;
+  height: 168px;
   padding: 16px;
 }
-
 .events {
-  height: 150px;
-  margin-top: 14px;
+  height: 158px;
   padding: 16px;
+  font-size: 13px;
 }
-
 .events table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
 }
-
 .events td, .events th {
-  padding: 8px;
+  padding: 6px 8px;
   border-bottom: 1px solid rgba(135,170,205,.16);
   text-align: left;
 }
-
 .scale {
-  height: 150px;
+  height: 158px;
   padding: 16px;
 }
-
 .dot {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   margin-right: 8px;
 }
-
 button {
-  margin-top: 22px;
+  margin-top: 20px;
   width: 100%;
   padding: 13px;
   border-radius: 8px;
   border: 1px solid rgba(135,170,205,.28);
   background: rgba(255,255,255,.04);
   color: #d9e8f7;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>
 </head>
 <body>
 <canvas id="scene"></canvas>
 
+<!-- Top Bar -->
 <section class="top panel">
   <div class="kpi">
-    <div class="title">SPACE WEATHER RISK</div>
-    <div class="subtitle">LIVE LEO MONITORING</div>
+    <div class="title" style="font-size:19px">SPACE WEATHER RISK</div>
+    <div class="subtitle" style="font-size:12.5px">LIVE LEO MONITORING</div>
     <div class="small green">● SYSTEM STATUS OPERATIONAL</div>
   </div>
-  <div class="kpi"><div class="label">Satellites Tracked</div><div class="value">42</div><div class="small green">● Active</div></div>
-  <div class="kpi"><div class="label">Avg Altitude</div><div class="value">548 <small>km</small></div><div class="small">± 12 km</div></div>
-  <div class="kpi"><div class="label">KP Index</div><div class="value orange">5.3</div><div class="small orange">● Moderate</div></div>
-  <div class="kpi"><div class="label">Drag Severity</div><div class="value">Moderate</div><div class="small orange">↗ Rising</div></div>
-  <div class="kpi"><div class="label">High-Risk Objects</div><div class="value">3</div><div class="small orange">● Watch</div></div>
-  <div class="kpi"><div class="label">Propagation Status</div><div class="value green">LIVE</div><div class="small">Real-time</div></div>
-  <div class="kpi"><div class="label">Time UTC</div><div class="value" style="font-size:18px">2026-05-08</div><div class="small">05:24:17</div></div>
+  <div class="kpi"><div class="label">SATELLITES TRACKED</div><div class="value">42</div><div class="small green">● Active</div></div>
+  <div class="kpi"><div class="label">AVG ALTITUDE</div><div class="value">548 <small>km</small></div><div class="small">± 12 km</div></div>
+  <div class="kpi"><div class="label">KP INDEX</div><div class="value orange">5.3</div><div class="small orange">● Moderate</div></div>
+  <div class="kpi"><div class="label">DRAG SEVERITY</div><div class="value">Moderate</div><div class="small orange">↗ Rising</div></div>
+  <div class="kpi"><div class="label">HIGH-RISK OBJECTS</div><div class="value">3</div><div class="small orange">● Watch</div></div>
+  <div class="kpi"><div class="label">PROPAGATION STATUS</div><div class="value green">LIVE</div><div class="small">Real-time</div></div>
+  <div class="kpi"><div class="label">TIME (UTC)</div><div class="value" style="font-size:19px">2026-05-08</div><div class="small">05:24:17</div></div>
 </section>
 
+<!-- Side Panel -->
 <section class="side panel">
-  <div class="label">Selected Satellite</div>
-  <h2>STARLINK-2984</h2>
+  <div class="label">SELECTED SATELLITE</div>
+  <h2>STARLINK-2984 <span style="color:#56d28a;font-size:13px">ACTIVE</span></h2>
   <div class="sat-img"><div class="sat-body"></div></div>
+  
   <div class="rows">
     <div><span>Altitude</span><strong>534 km</strong></div>
     <div><span>Inclination</span><strong>70.1°</strong></div>
     <div><span>Velocity</span><strong>7.61 km/s</strong></div>
     <div><span>RAAN</span><strong>128.7°</strong></div>
+    <div><span>Argument of Perigee</span><strong>87.4°</strong></div>
     <div><span>Mean Anomaly</span><strong>205.3°</strong></div>
     <div><span>Drag Risk</span><strong class="orange">ELEVATED</strong></div>
     <div><span>Atmospheric Density</span><strong>1.17× baseline</strong></div>
     <div><span>Estimated Decay</span><strong>0.018 km / orbit</strong></div>
+    <div><span>Orbit Epoch (UTC)</span><strong>05:24:12</strong></div>
   </div>
-  <button>VIEW FULL PROFILE ›</button>
+  <button>VIEW FULL PROFILE →</button>
 </section>
 
+<!-- Bottom Section -->
 <section class="bottom">
   <div>
     <div class="charts">
       <div class="chart panel">
-        <div class="label">Atmospheric Density Index <span class="orange" style="float:right">1.17× baseline</span></div>
-        <canvas id="density"></canvas>
+        <div class="label">ATMOSPHERIC DENSITY INDEX <span class="orange" style="float:right">1.17× baseline</span></div>
+        <canvas id="density" height="120"></canvas>
       </div>
       <div class="chart panel">
-        <div class="label">KP Index (3-hour) <span class="orange" style="float:right">5.3 Moderate</span></div>
-        <canvas id="kp"></canvas>
+        <div class="label">KP INDEX (3-HOUR) <span class="orange" style="float:right">5.3 Moderate</span></div>
+        <canvas id="kp" height="120"></canvas>
       </div>
     </div>
+
     <div class="events panel">
-      <div class="label">Recent Operational Events</div>
+      <div class="label">RECENT OPERATIONAL EVENTS</div>
       <table>
-        <tr><th>Time UTC</th><th>Event</th><th>Severity</th><th>Details</th></tr>
-        <tr><td>05:24:02</td><td>Kp threshold crossed</td><td class="orange">MODERATE</td><td>Geomagnetic activity increasing</td></tr>
-        <tr><td>05:23:41</td><td>3 objects flagged</td><td class="orange">WATCH</td><td>Conjunction risk evaluated</td></tr>
+        <tr><th>TIME (UTC)</th><th>EVENT</th><th>SEVERITY</th><th>DETAILS</th></tr>
+        <tr><td>05:24:02</td><td>Kp threshold crossed (5.0)</td><td class="orange">MODERATE</td><td>Geomagnetic activity increasing – minor density rise expected</td></tr>
+        <tr><td>05:23:41</td><td>3 objects flagged</td><td class="orange">WATCH</td><td>Conjunction risk evaluated – all clear</td></tr>
+        <tr><td>05:22:58</td><td>Propagation batch complete</td><td class="green">INFO</td><td>42 satellites propagated successfully</td></tr>
       </table>
     </div>
   </div>
+
+  <!-- Drag Risk Scale -->
   <div class="scale panel">
-    <div class="label">Drag Risk Scale</div>
+    <div class="label">DRAG RISK SCALE</div>
     <p><span class="dot" style="background:#56d28a"></span>Nominal &lt; 1.10×</p>
-    <p><span class="dot" style="background:#f7c647"></span>Moderate 1.10× - 1.30×</p>
-    <p><span class="dot" style="background:#ff8a2a"></span>Elevated 1.30× - 1.60×</p>
+    <p><span class="dot" style="background:#f7c647"></span>Moderate 1.10× – 1.30×</p>
+    <p><span class="dot" style="background:#ff8a2a"></span>Elevated 1.30× – 1.60×</p>
     <p><span class="dot" style="background:#ff5252"></span>High &gt; 1.60×</p>
   </div>
 </section>
 
 <script>
+// Background Earth + Satellites
 const c = document.getElementById("scene");
 const ctx = c.getContext("2d");
 
@@ -276,7 +262,7 @@ function resize() {
   c.height = innerHeight * devicePixelRatio;
   c.style.width = innerWidth + "px";
   c.style.height = innerHeight + "px";
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 }
 resize();
 addEventListener("resize", resize);
@@ -284,66 +270,70 @@ addEventListener("resize", resize);
 const stars = Array.from({length: 260}, () => ({
   x: Math.random() * innerWidth,
   y: Math.random() * innerHeight,
-  r: Math.random() * 1.2
+  r: Math.random() * 1.3
 }));
 
 const sats = Array.from({length: 42}, (_, i) => ({
   a: Math.random() * Math.PI * 2,
-  s: .002 + Math.random()*.004,
-  r: 260 + Math.random()*150,
-  tilt: -0.7 + Math.random()*1.4
+  s: 0.0018 + Math.random() * 0.0042,
+  r: 255 + Math.random() * 160,
+  tilt: -0.75 + Math.random() * 1.5
 }));
 
 function drawEarth(t) {
-  const x = innerWidth * .42, y = innerHeight * .42, r = 220;
-  const g = ctx.createRadialGradient(x-r*.3,y-r*.4,20,x,y,r);
-  g.addColorStop(0,"#d6f4ff");
-  g.addColorStop(.25,"#3e8bd3");
-  g.addColorStop(.68,"#102e4d");
-  g.addColorStop(1,"#02060d");
+  const x = innerWidth * 0.415, y = innerHeight * 0.42, r = 225;
+  const g = ctx.createRadialGradient(x-r*0.35, y-r*0.45, 30, x, y, r*1.05);
+  g.addColorStop(0, "#d6f4ff");
+  g.addColorStop(0.3, "#3e8bd3");
+  g.addColorStop(0.75, "#102e4d");
+  g.addColorStop(1, "#02060d");
+  
   ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
 
-  ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.clip();
-  for(let i=0;i<9;i++){
-    ctx.fillStyle = "rgba(210,180,120,.65)";
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.clip();
+  ctx.fillStyle = "rgba(210,180,120,0.65)";
+  for(let i = 0; i < 10; i++) {
     ctx.beginPath();
-    ctx.ellipse(x+Math.sin(t*.0003+i)*r*.65,y+Math.cos(t*.0002+i)*r*.45,70,18,t*.0002+i,0,Math.PI*2);
+    ctx.ellipse(x + Math.sin(t*0.0003 + i)*r*0.62, 
+                y + Math.cos(t*0.0002 + i)*r*0.42, 
+                72, 19, t*0.0002 + i, 0, Math.PI*2);
     ctx.fill();
   }
   ctx.restore();
 
-  ctx.strokeStyle="rgba(160,210,255,.55)";
-  ctx.lineWidth=2;
-  ctx.beginPath(); ctx.arc(x,y,r+4,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = "rgba(160,210,255,0.6)";
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(x, y, r+6, 0, Math.PI*2); ctx.stroke();
 }
 
-function drawScene(t){
-  ctx.clearRect(0,0,innerWidth,innerHeight);
-  ctx.fillStyle="#02070d"; ctx.fillRect(0,0,innerWidth,innerHeight);
+function drawScene(t) {
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.fillStyle = "#02070d"; ctx.fillRect(0, 0, innerWidth, innerHeight);
 
-  stars.forEach(s=>{
-    ctx.fillStyle="rgba(255,255,255,.55)";
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+  stars.forEach(s => {
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
   });
 
-  const ex = innerWidth*.42, ey = innerHeight*.42;
-
-  sats.forEach(s=>{
+  const ex = innerWidth * 0.415, ey = innerHeight * 0.42;
+  sats.forEach(s => {
     s.a += s.s;
     ctx.save();
-    ctx.translate(ex,ey);
+    ctx.translate(ex, ey);
     ctx.rotate(s.tilt);
-    ctx.strokeStyle="rgba(255,255,255,.22)";
-    ctx.lineWidth=.8;
-    ctx.beginPath(); ctx.ellipse(0,0,s.r,s.r*.36,0,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s.r, s.r * 0.36, 0, 0, Math.PI*2);
+    ctx.stroke();
 
-    const x=Math.cos(s.a)*s.r, y=Math.sin(s.a)*s.r*.36;
-    ctx.fillStyle="white";
-    ctx.shadowBlur=10; ctx.shadowColor="white";
-    ctx.fillRect(x-2,y-2,4,4);
-    ctx.fillRect(x-9,y-1,6,2);
-    ctx.fillRect(x+3,y-1,6,2);
+    const x = Math.cos(s.a) * s.r;
+    const y = Math.sin(s.a) * s.r * 0.36;
+    ctx.fillStyle = "#fff";
+    ctx.shadowBlur = 12; ctx.shadowColor = "#fff";
+    ctx.fillRect(x-2.5, y-2.5, 5, 5);
     ctx.restore();
   });
 
@@ -352,27 +342,33 @@ function drawScene(t){
 }
 drawScene(0);
 
+// Chart helpers
 function drawLine(id, values, colour) {
   const cc = document.getElementById(id);
   const x = cc.getContext("2d");
-  cc.width = cc.clientWidth * devicePixelRatio;
-  cc.height = cc.clientHeight * devicePixelRatio;
-  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  const dpr = devicePixelRatio;
+  cc.width = cc.clientWidth * dpr;
+  cc.height = cc.clientHeight * dpr;
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
   const w = cc.clientWidth, h = cc.clientHeight;
+
   x.strokeStyle = colour;
-  x.lineWidth = 2;
+  x.lineWidth = 2.5;
+  x.lineJoin = "round";
+  x.shadowBlur = 8;
+  x.shadowColor = colour;
+
   x.beginPath();
-  values.forEach((v,i)=>{
-    const px = i/(values.length-1)*w;
-    const py = h - v*h;
-    i ? x.lineTo(px,py) : x.moveTo(px,py);
+  values.forEach((v, i) => {
+    const px = i / (values.length - 1) * w;
+    const py = h - v * h * 0.95;
+    i ? x.lineTo(px, py) : x.moveTo(px, py);
   });
   x.stroke();
 }
 
-drawLine("density",[.35,.38,.42,.36,.48,.44,.55,.62], "#8fd4ff");
-drawLine("kp",[.2,.26,.35,.45,.62,.72,.68,.56], "#ff8a2a");
+drawLine("density", [0.92, 0.95, 1.05, 0.98, 1.12, 1.08, 1.25, 1.38, 1.45, 1.62], "#8fd4ff");
+drawLine("kp", [0.25, 0.38, 0.55, 0.72, 0.85, 0.92, 0.88, 0.75], "#ff8a2a");
 </script>
 </body>
 </html>
-EOF
