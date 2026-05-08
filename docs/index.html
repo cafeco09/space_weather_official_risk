@@ -10,170 +10,155 @@ body {
   margin: 0;
   background: #02070d;
   color: #eaf2ff;
-  font-family: Inter, system-ui, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, Arial, sans-serif;
   overflow: hidden;
   height: 100vh;
 }
-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-}
+canvas { position: fixed; inset: 0; z-index: 1; }
+
 .panel {
-  background: rgba(4, 14, 25, 0.85);
-  border: 1px solid rgba(135, 170, 205, 0.28);
-  border-radius: 10px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 20px 80px rgba(0,0,0,.4);
+  background: rgba(4, 14, 25, 0.88);
+  border: 1px solid rgba(135, 170, 205, 0.25);
+  border-radius: 8px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 15px 60px rgba(0,0,0,0.5);
 }
 
 .top {
   position: fixed;
-  top: 14px;
-  left: 14px;
-  right: 14px;
-  height: 108px;
-  z-index: 5;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 98px;
+  z-index: 10;
   display: grid;
-  grid-template-columns: 1.45fr repeat(7, 1fr);
-  gap: 2px;
+  grid-template-columns: 1.48fr repeat(7, 1fr);
+  gap: 4px;
 }
 .kpi {
-  padding: 14px 18px;
-  border-right: 1px solid rgba(135,170,205,.25);
+  padding: 12px 16px;
+  border-right: 1px solid rgba(135,170,205,0.22);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-.kpi:last-child { border-right: 0; }
+.kpi:last-child { border-right: none; }
+
 .label {
-  color: #a7b5c6;
-  font-size: 11.5px;
-  letter-spacing: .12em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #a0b0c8;
   font-weight: 500;
 }
 .value {
-  margin-top: 8px;
-  font-size: 29px;
+  font-size: 28px;
   font-weight: 800;
+  margin-top: 4px;
   line-height: 1;
 }
 .small {
-  margin-top: 6px;
-  color: #9aaabc;
-  font-size: 12.5px;
+  font-size: 12.2px;
+  margin-top: 4px;
 }
 .green { color: #56d28a; }
-.orange { color: #ff8a2a; }
-.red { color: #ff5252; }
+.orange { color: #ff9f2a; }
 
 .side {
   position: fixed;
   right: 14px;
-  top: 138px;
-  width: 355px;
-  height: calc(100vh - 280px);
-  z-index: 5;
-  padding: 22px;
+  top: 126px;
+  width: 348px;
+  bottom: 14px;
+  z-index: 10;
+  padding: 20px;
   overflow-y: auto;
 }
 .side h2 {
-  margin: 0 0 18px;
-  font-size: 19px;
-  letter-spacing: .04em;
+  margin: 8px 0 20px;
+  font-size: 20px;
+  font-weight: 700;
 }
 .sat-img {
-  height: 110px;
-  margin: 20px 0 28px;
+  height: 98px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  margin: 15px 0 22px;
 }
 .sat-body {
-  width: 52px;
-  height: 38px;
-  background: #ddd;
+  width: 48px;
+  height: 34px;
+  background: #e0e0e0;
   position: relative;
-  transform: rotate(-10deg);
-  box-shadow: 0 4px 12px rgba(0,0,0,.6);
+  transform: rotate(-12deg);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.7);
 }
 .sat-body:before,
 .sat-body:after {
   content: "";
   position: absolute;
-  top: 9px;
-  width: 92px;
-  height: 21px;
-  background: linear-gradient(90deg, #6f8299, #c6d7eb, #44566e);
+  top: 7px;
+  height: 19px;
+  width: 88px;
+  background: linear-gradient(90deg, #6a7e96, #c5d4eb, #3f5a7a);
 }
-.sat-body:before { right: -48px; }
-.sat-body:after { left: -48px; }
+.sat-body:before { right: -52px; }
+.sat-body:after { left: -52px; }
 
 .rows div {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(135,170,205,.18);
-  color: #b5c4d5;
-  font-size: 13.5px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(135,170,205,0.16);
+  font-size: 13.4px;
 }
-.rows strong { color: white; font-weight: 600; }
+.rows strong { color: #fff; }
 
 .bottom {
   position: fixed;
   left: 14px;
   right: 380px;
   bottom: 14px;
-  z-index: 5;
+  z-index: 10;
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 14px;
-}
-.charts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 14px;
 }
 .chart {
-  height: 168px;
-  padding: 16px;
+  height: 162px;
+  padding: 14px;
 }
 .events {
-  height: 158px;
-  padding: 16px;
-  font-size: 13px;
+  height: 152px;
+  padding: 14px;
+  font-size: 12.8px;
 }
-.events table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.events td, .events th {
-  padding: 6px 8px;
-  border-bottom: 1px solid rgba(135,170,205,.16);
+.events table { width: 100%; border-collapse: collapse; }
+.events th, .events td {
+  padding: 5px 8px;
   text-align: left;
+  border-bottom: 1px solid rgba(135,170,205,0.15);
 }
 .scale {
-  height: 158px;
-  padding: 16px;
+  height: 152px;
+  padding: 14px;
 }
 .dot {
   display: inline-block;
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-right: 6px;
 }
 button {
-  margin-top: 20px;
+  margin-top: 18px;
   width: 100%;
-  padding: 13px;
-  border-radius: 8px;
-  border: 1px solid rgba(135,170,205,.28);
-  background: rgba(255,255,255,.04);
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(135,170,205,0.3);
   color: #d9e8f7;
+  border-radius: 7px;
   font-weight: 600;
-  cursor: pointer;
 }
 </style>
 </head>
@@ -183,12 +168,12 @@ button {
 <!-- Top Bar -->
 <section class="top panel">
   <div class="kpi">
-    <div class="title" style="font-size:19px">SPACE WEATHER RISK</div>
-    <div class="subtitle" style="font-size:12.5px">LIVE LEO MONITORING</div>
+    <div style="font-size:19px;font-weight:700">SPACE WEATHER RISK</div>
+    <div style="font-size:12px;color:#a0b0c8">LIVE LEO MONITORING</div>
     <div class="small green">● SYSTEM STATUS OPERATIONAL</div>
   </div>
   <div class="kpi"><div class="label">SATELLITES TRACKED</div><div class="value">42</div><div class="small green">● Active</div></div>
-  <div class="kpi"><div class="label">AVG ALTITUDE</div><div class="value">548 <small>km</small></div><div class="small">± 12 km</div></div>
+  <div class="kpi"><div class="label">AVG ALTITUDE</div><div class="value">548 <small style="font-size:14px">km</small></div><div class="small">± 12 km</div></div>
   <div class="kpi"><div class="label">KP INDEX</div><div class="value orange">5.3</div><div class="small orange">● Moderate</div></div>
   <div class="kpi"><div class="label">DRAG SEVERITY</div><div class="value">Moderate</div><div class="small orange">↗ Rising</div></div>
   <div class="kpi"><div class="label">HIGH-RISK OBJECTS</div><div class="value">3</div><div class="small orange">● Watch</div></div>
@@ -199,7 +184,7 @@ button {
 <!-- Side Panel -->
 <section class="side panel">
   <div class="label">SELECTED SATELLITE</div>
-  <h2>STARLINK-2984 <span style="color:#56d28a;font-size:13px">ACTIVE</span></h2>
+  <h2>STARLINK-2984 <span style="color:#56d28a;font-size:13px;float:right">ACTIVE</span></h2>
   <div class="sat-img"><div class="sat-body"></div></div>
   
   <div class="rows">
@@ -217,17 +202,17 @@ button {
   <button>VIEW FULL PROFILE →</button>
 </section>
 
-<!-- Bottom Section -->
+<!-- Bottom -->
 <section class="bottom">
   <div>
-    <div class="charts">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div class="chart panel">
         <div class="label">ATMOSPHERIC DENSITY INDEX <span class="orange" style="float:right">1.17× baseline</span></div>
-        <canvas id="density" height="120"></canvas>
+        <canvas id="density" style="width:100%;height:118px"></canvas>
       </div>
       <div class="chart panel">
         <div class="label">KP INDEX (3-HOUR) <span class="orange" style="float:right">5.3 Moderate</span></div>
-        <canvas id="kp" height="120"></canvas>
+        <canvas id="kp" style="width:100%;height:118px"></canvas>
       </div>
     </div>
 
@@ -242,7 +227,6 @@ button {
     </div>
   </div>
 
-  <!-- Drag Risk Scale -->
   <div class="scale panel">
     <div class="label">DRAG RISK SCALE</div>
     <p><span class="dot" style="background:#56d28a"></span>Nominal &lt; 1.10×</p>
@@ -253,7 +237,7 @@ button {
 </section>
 
 <script>
-// Background Earth + Satellites
+// Background Scene
 const c = document.getElementById("scene");
 const ctx = c.getContext("2d");
 
@@ -265,75 +249,67 @@ function resize() {
   ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 }
 resize();
-addEventListener("resize", resize);
+window.addEventListener("resize", resize);
 
-const stars = Array.from({length: 260}, () => ({
-  x: Math.random() * innerWidth,
-  y: Math.random() * innerHeight,
-  r: Math.random() * 1.3
-}));
-
-const sats = Array.from({length: 42}, (_, i) => ({
-  a: Math.random() * Math.PI * 2,
-  s: 0.0018 + Math.random() * 0.0042,
-  r: 255 + Math.random() * 160,
-  tilt: -0.75 + Math.random() * 1.5
+const stars = Array.from({length:280}, () => ({x:Math.random()*innerWidth, y:Math.random()*innerHeight, r:Math.random()*1.4}));
+const sats = Array.from({length:42}, () => ({
+  a: Math.random()*Math.PI*2,
+  s: 0.0015 + Math.random()*0.0035,
+  r: 248 + Math.random()*165,
+  tilt: -0.8 + Math.random()*1.6
 }));
 
 function drawEarth(t) {
-  const x = innerWidth * 0.415, y = innerHeight * 0.42, r = 225;
-  const g = ctx.createRadialGradient(x-r*0.35, y-r*0.45, 30, x, y, r*1.05);
-  g.addColorStop(0, "#d6f4ff");
-  g.addColorStop(0.3, "#3e8bd3");
-  g.addColorStop(0.75, "#102e4d");
-  g.addColorStop(1, "#02060d");
-  
+  const x = innerWidth * 0.415;
+  const y = innerHeight * 0.415;
+  const r = 228;
+
+  const g = ctx.createRadialGradient(x-70, y-85, 35, x, y, r*1.1);
+  g.addColorStop(0, "#c8e8ff");
+  g.addColorStop(0.35, "#2b7bc9");
+  g.addColorStop(0.75, "#0e2a4a");
+  g.addColorStop(1, "#01050f");
+
   ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
 
   ctx.save();
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.clip();
-  ctx.fillStyle = "rgba(210,180,120,0.65)";
-  for(let i = 0; i < 10; i++) {
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle = "rgba(255,220,160,0.55)";
+  for(let i=0; i<11; i++) {
     ctx.beginPath();
-    ctx.ellipse(x + Math.sin(t*0.0003 + i)*r*0.62, 
-                y + Math.cos(t*0.0002 + i)*r*0.42, 
-                72, 19, t*0.0002 + i, 0, Math.PI*2);
+    ctx.ellipse(x + Math.sin(t*0.00025+i)*r*0.58, y + Math.cos(t*0.0002+i)*r*0.38, 78, 21, t*0.00015+i, 0, Math.PI*2);
     ctx.fill();
   }
   ctx.restore();
-
-  ctx.strokeStyle = "rgba(160,210,255,0.6)";
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(x, y, r+6, 0, Math.PI*2); ctx.stroke();
 }
 
 function drawScene(t) {
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
-  ctx.fillStyle = "#02070d"; ctx.fillRect(0, 0, innerWidth, innerHeight);
+  ctx.fillStyle = "#02070d"; ctx.fillRect(0,0,innerWidth,innerHeight);
 
   stars.forEach(s => {
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
     ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
   });
 
-  const ex = innerWidth * 0.415, ey = innerHeight * 0.42;
+  const cx = innerWidth * 0.415, cy = innerHeight * 0.415;
   sats.forEach(s => {
     s.a += s.s;
     ctx.save();
-    ctx.translate(ex, ey);
+    ctx.translate(cx, cy);
     ctx.rotate(s.tilt);
-    ctx.strokeStyle = "rgba(255,255,255,0.22)";
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(200,230,255,0.25)";
+    ctx.lineWidth = 1.1;
     ctx.beginPath();
-    ctx.ellipse(0, 0, s.r, s.r * 0.36, 0, 0, Math.PI*2);
+    ctx.ellipse(0, 0, s.r, s.r*0.35, 0, 0, Math.PI*2);
     ctx.stroke();
 
-    const x = Math.cos(s.a) * s.r;
-    const y = Math.sin(s.a) * s.r * 0.36;
-    ctx.fillStyle = "#fff";
-    ctx.shadowBlur = 12; ctx.shadowColor = "#fff";
-    ctx.fillRect(x-2.5, y-2.5, 5, 5);
+    const px = Math.cos(s.a) * s.r;
+    const py = Math.sin(s.a) * s.r * 0.35;
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = "#fff";
+    ctx.fillRect(px-2.5, py-2.5, 5, 5);
     ctx.restore();
   });
 
@@ -342,33 +318,32 @@ function drawScene(t) {
 }
 drawScene(0);
 
-// Chart helpers
-function drawLine(id, values, colour) {
-  const cc = document.getElementById(id);
-  const x = cc.getContext("2d");
+// Charts
+function drawLine(id, data, color) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
   const dpr = devicePixelRatio;
-  cc.width = cc.clientWidth * dpr;
-  cc.height = cc.clientHeight * dpr;
-  x.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const w = cc.clientWidth, h = cc.clientHeight;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  x.strokeStyle = colour;
-  x.lineWidth = 2.5;
-  x.lineJoin = "round";
-  x.shadowBlur = 8;
-  x.shadowColor = colour;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.8;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = color;
+  ctx.lineJoin = "round";
 
-  x.beginPath();
-  values.forEach((v, i) => {
-    const px = i / (values.length - 1) * w;
-    const py = h - v * h * 0.95;
-    i ? x.lineTo(px, py) : x.moveTo(px, py);
+  ctx.beginPath();
+  data.forEach((v,i) => {
+    const x = i / (data.length-1) * canvas.clientWidth;
+    const y = canvas.clientHeight * (1 - v*0.92);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
   });
-  x.stroke();
+  ctx.stroke();
 }
 
-drawLine("density", [0.92, 0.95, 1.05, 0.98, 1.12, 1.08, 1.25, 1.38, 1.45, 1.62], "#8fd4ff");
-drawLine("kp", [0.25, 0.38, 0.55, 0.72, 0.85, 0.92, 0.88, 0.75], "#ff8a2a");
+drawLine("density", [0.88,0.95,1.02,0.97,1.10,1.15,1.28,1.45,1.52,1.67], "#7ec8ff");
+drawLine("kp", [0.18,0.32,0.48,0.65,0.81,0.95,0.89,0.72], "#ff9f2a");
 </script>
 </body>
 </html>
