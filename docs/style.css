@@ -1,192 +1,92 @@
-cat > docs/style.css <<'EOF'
-* {
-  box-sizing: border-box;
-}
-
+cat > src/style.css <<'EOF'
 body {
   margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 70% 30%, rgba(64, 150, 255, 0.22), transparent 34%),
-    radial-gradient(circle at 20% 10%, rgba(120, 230, 255, 0.12), transparent 28%),
-    #030814;
-  color: #f2f7ff;
-  min-height: 100vh;
-  overflow-x: hidden;
+  background: #020713;
+  color: white;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
-.layout {
-  min-height: 86vh;
-  display: grid;
-  grid-template-columns: 0.9fr 1.25fr;
-  gap: 28px;
-  align-items: center;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 48px 24px 22px;
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
 }
 
-.left {
-  padding: 34px;
+canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.hud {
+  position: absolute;
+  left: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 460px;
+  padding: 30px;
+  border-radius: 28px;
+  background: rgba(5, 14, 31, 0.62);
+  border: 1px solid rgba(145, 220, 255, 0.16);
+  backdrop-filter: blur(18px);
 }
 
 .eyebrow {
-  margin: 0 0 16px;
   color: #7ee7ff;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
 h1 {
-  margin: 0;
-  max-width: 680px;
-  font-size: clamp(2.8rem, 7vw, 6.6rem);
+  font-size: clamp(3rem, 7vw, 6rem);
   line-height: 0.9;
-  letter-spacing: -0.07em;
+  margin: 0;
 }
 
-.subtitle {
-  max-width: 580px;
-  margin: 24px 0 0;
-  color: #b8c8dc;
-  font-size: 1.15rem;
-  line-height: 1.65;
+.hud p {
+  color: #bad0e8;
+  line-height: 1.6;
 }
 
-.metrics {
+.cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 34px;
+  gap: 11px;
+  margin-top: 22px;
 }
 
-.metrics div {
-  padding: 18px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(16px);
+.cards div {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
 }
 
-.metrics strong {
+.cards strong {
   display: block;
-  font-size: 1.9rem;
+  font-size: 1.45rem;
 }
 
-.metrics span {
-  display: block;
-  color: #9fb2c9;
-  font-size: 0.9rem;
-  margin-top: 4px;
+.cards span {
+  color: #a6b9cc;
+  font-size: 0.8rem;
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 26px;
-  color: #bed0e7;
-}
-
-.legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.low {
-  background: #77f7d2;
-  box-shadow: 0 0 16px #77f7d2;
-}
-
-.medium {
-  background: #ffd166;
-  box-shadow: 0 0 16px #ffd166;
-}
-
-.high {
-  background: #ff6b6b;
-  box-shadow: 0 0 16px #ff6b6b;
-}
-
-.stage {
-  position: relative;
-  height: min(78vh, 760px);
-  min-height: 560px;
-  border-radius: 38px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at center, rgba(93, 181, 255, 0.1), transparent 44%),
-    rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 30px 120px rgba(0, 0, 0, 0.55);
-}
-
-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.tooltip {
+#tooltip {
   position: absolute;
   display: none;
-  min-width: 170px;
   padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(4, 11, 24, 0.92);
-  border: 1px solid rgba(126, 231, 255, 0.32);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
-  color: #d9ebff;
+  border-radius: 14px;
+  background: rgba(4, 10, 22, 0.94);
+  border: 1px solid rgba(126, 231, 255, 0.3);
+  color: #dceeff;
   pointer-events: none;
-  z-index: 10;
-  font-size: 0.9rem;
 }
 
-.tooltip strong {
-  display: block;
+#tooltip strong {
   color: white;
-  margin-bottom: 5px;
-}
-
-.flow {
-  max-width: 1260px;
-  margin: 0 auto 34px;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-.flow div {
-  padding: 18px;
-  border-radius: 20px;
-  background: rgba(126, 231, 255, 0.07);
-  border: 1px solid rgba(126, 231, 255, 0.16);
-  color: #dbeeff;
-}
-
-@media (max-width: 980px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .stage {
-    min-height: 520px;
-  }
-
-  .metrics,
-  .flow {
-    grid-template-columns: 1fr;
-  }
+  display: block;
+  margin-bottom: 4px;
 }
 EOF
