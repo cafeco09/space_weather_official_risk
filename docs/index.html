@@ -3,33 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Operational Space Weather Globe</title>
+  <title>Space Weather Risk Console</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     :root {
-      --bg: #040913;
-      --panel: rgba(7, 16, 30, 0.72);
-      --border: rgba(180, 210, 255, 0.14);
+      --bg: #030711;
+      --panel: rgba(5, 13, 26, 0.68);
+      --panel-soft: rgba(5, 13, 26, 0.42);
+      --line: rgba(185, 214, 255, 0.14);
       --text: #eef5ff;
-      --muted: #9cb0c8;
-      --orbit: rgba(255,255,255,0.12);
-      --accent: #8fd4ff;
-      --warn: #f7c66d;
-      --danger: #ff7d7d;
+      --muted: #8fa5bf;
+      --muted-2: #667b95;
+      --blue: #8fd4ff;
+      --amber: #f2c46d;
+      --red: #ff7f7f;
+      --green: #8ee6bd;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
       overflow: hidden;
       background:
-        radial-gradient(circle at top, rgba(40,90,180,0.22), transparent 30%),
-        radial-gradient(circle at 70% 30%, rgba(40,130,255,0.12), transparent 25%),
+        radial-gradient(circle at 50% 44%, rgba(55, 130, 220, 0.18), transparent 34%),
+        radial-gradient(circle at 50% 18%, rgba(80, 170, 255, 0.10), transparent 30%),
         var(--bg);
       color: var(--text);
-      font-family: Inter, Arial, sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     }
 
     canvas {
@@ -38,129 +40,239 @@
       width: 100vw;
       height: 100vh;
       display: block;
+      z-index: 1;
     }
 
-    .topbar {
+    .kpi-strip {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
+      top: 18px;
+      left: 22px;
+      right: 22px;
       z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      pointer-events: none;
     }
 
     .kpi {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-      border-radius: 18px;
-      padding: 14px 16px;
+      min-height: 76px;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 50px rgba(0, 0, 0, 0.22);
     }
 
     .kpi-label {
       color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      white-space: nowrap;
     }
 
     .kpi-value {
       margin-top: 8px;
-      font-size: 1.45rem;
-      font-weight: 700;
+      font-size: clamp(1.05rem, 2vw, 1.42rem);
+      line-height: 1;
+      font-weight: 750;
+      letter-spacing: -0.02em;
     }
 
-    .bottom-panel {
+    .kpi-sub {
+      margin-top: 5px;
+      font-size: 0.72rem;
+      color: var(--muted-2);
+    }
+
+    .status-live { color: var(--green); }
+    .status-warning { color: var(--amber); }
+    .status-critical { color: var(--red); }
+
+    .title-lockup {
       position: fixed;
-      left: 20px;
-      right: 20px;
-      bottom: 20px;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 18px;
+      left: 26px;
+      top: 116px;
       z-index: 10;
+      width: 330px;
+      pointer-events: none;
     }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-      border-radius: 22px;
-      padding: 18px;
+    .eyebrow {
+      color: var(--blue);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3.4vw, 3.8rem);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .inspector {
+      position: fixed;
+      right: 24px;
+      top: 116px;
+      width: 300px;
+      z-index: 10;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      padding: 16px;
+      pointer-events: none;
     }
 
     .panel-title {
-      font-size: 0.78rem;
       color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 14px;
-    }
-
-    .satellite-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .sat-item {
-      padding: 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 12px;
     }
 
     .sat-name {
-      font-weight: 700;
-      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 760;
+      margin-bottom: 12px;
     }
 
-    .sat-meta {
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .meta {
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .meta span {
+      display: block;
+      color: var(--muted-2);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .meta strong {
+      font-size: 0.93rem;
+    }
+
+    .bottom-console {
+      position: fixed;
+      left: 22px;
+      right: 22px;
+      bottom: 18px;
+      height: 154px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr 0.9fr;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .console-card {
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .compact-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .compact-table td {
+      padding: 7px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.055);
       color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.6;
     }
 
-    .timeline {
-      display: flex;
-      align-items: end;
+    .compact-table td:last-child {
+      text-align: right;
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .chart {
+      width: 100%;
+      height: 98px;
+    }
+
+    .chart text {
+      fill: var(--muted-2);
+      font-size: 9px;
+    }
+
+    .events {
+      display: grid;
       gap: 8px;
-      height: 160px;
-      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
     }
 
-    .bar {
-      flex: 1;
-      border-radius: 10px 10px 4px 4px;
-      background: linear-gradient(to top, rgba(70,140,255,0.28), rgba(130,220,255,0.82));
-      min-height: 24px;
+    .event {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
     }
 
-    .status-live {
-      color: #9df0c7;
+    .event strong {
+      color: var(--text);
+      font-weight: 650;
     }
 
-    .status-warning {
-      color: var(--warn);
-    }
-
-    .status-critical {
-      color: var(--danger);
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: 188px;
+      transform: translateX(-50%);
+      color: rgba(220, 236, 255, 0.55);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      z-index: 10;
+      pointer-events: none;
     }
 
     @media (max-width: 1100px) {
-      .topbar {
-        grid-template-columns: repeat(2, 1fr);
+      .kpi-strip {
+        grid-template-columns: repeat(3, 1fr);
       }
 
-      .bottom-panel {
-        grid-template-columns: 1fr;
+      .title-lockup,
+      .inspector {
+        display: none;
       }
 
-      .satellite-grid {
+      .bottom-console {
         grid-template-columns: 1fr;
+        height: auto;
       }
     }
   </style>
@@ -168,77 +280,87 @@
 <body>
   <canvas id="space"></canvas>
 
-  <section class="topbar">
+  <section class="kpi-strip">
     <div class="kpi">
       <div class="kpi-label">Satellites Tracked</div>
       <div class="kpi-value">42</div>
+      <div class="kpi-sub">Starlink sample</div>
     </div>
-
     <div class="kpi">
       <div class="kpi-label">Average Altitude</div>
       <div class="kpi-value">548 km</div>
+      <div class="kpi-sub">LEO shell</div>
     </div>
-
     <div class="kpi">
       <div class="kpi-label">KP Index</div>
       <div class="kpi-value status-warning">5.3</div>
+      <div class="kpi-sub">geomagnetic activity</div>
     </div>
-
     <div class="kpi">
       <div class="kpi-label">Drag Severity</div>
       <div class="kpi-value status-warning">Moderate</div>
+      <div class="kpi-sub">density elevated</div>
     </div>
-
     <div class="kpi">
       <div class="kpi-label">High Risk Objects</div>
       <div class="kpi-value status-critical">3</div>
+      <div class="kpi-sub">decay threshold</div>
     </div>
-
     <div class="kpi">
       <div class="kpi-label">Propagation Status</div>
-      <div class="kpi-value status-live">Live</div>
+      <div class="kpi-value status-live" id="runStatus">Live</div>
+      <div class="kpi-sub">click satellite to pause</div>
     </div>
   </section>
 
-  <section class="bottom-panel">
-    <div class="panel">
-      <div class="panel-title">Selected Satellites</div>
+  <section class="title-lockup">
+    <div class="eyebrow">Operational LEO Monitor</div>
+    <h1>Space Weather Risk Globe</h1>
+    <div class="subtitle">Centred Earth view with restrained orbit paths, white Starlink-style craft and live drag-risk telemetry.</div>
+  </section>
 
-      <div class="satellite-grid">
-        <div class="sat-item">
-          <div class="sat-name">STARLINK-3217</div>
-          <div class="sat-meta">
-            Altitude: 552 km<br>
-            Inclination: 53.2°<br>
-            Velocity: 7.66 km/s<br>
-            Drag Risk: Nominal
-          </div>
-        </div>
+  <section class="inspector" id="inspector">
+    <div class="panel-title">Selected Object</div>
+    <div class="sat-name" id="satName">STARLINK-3217</div>
+    <div class="meta-grid">
+      <div class="meta"><span>Altitude</span><strong id="satAlt">552 km</strong></div>
+      <div class="meta"><span>Inclination</span><strong id="satInc">53.2°</strong></div>
+      <div class="meta"><span>Velocity</span><strong id="satVel">7.66 km/s</strong></div>
+      <div class="meta"><span>Drag Risk</span><strong id="satRisk">Nominal</strong></div>
+    </div>
+  </section>
 
-        <div class="sat-item">
-          <div class="sat-name">STARLINK-2984</div>
-          <div class="sat-meta">
-            Altitude: 534 km<br>
-            Inclination: 70.1°<br>
-            Velocity: 7.61 km/s<br>
-            Drag Risk: Elevated
-          </div>
-        </div>
-      </div>
+  <div class="hint">Earth-centred orbital propagation · click satellite to pause/resume</div>
+
+  <section class="bottom-console">
+    <div class="console-card">
+      <div class="panel-title">Selected Satellite Telemetry</div>
+      <table class="compact-table">
+        <tr><td>Epoch</td><td>2026-05-08 05:24 UTC</td></tr>
+        <tr><td>Estimated decay</td><td>0.018 km / orbit</td></tr>
+        <tr><td>Atmospheric scale</td><td>1.17× baseline</td></tr>
+      </table>
     </div>
 
-    <div class="panel">
-      <div class="panel-title">Atmospheric Density Trend</div>
+    <div class="console-card">
+      <div class="panel-title">Atmospheric Density Index</div>
+      <svg class="chart" viewBox="0 0 520 110" preserveAspectRatio="none">
+        <line x1="30" y1="88" x2="510" y2="88" stroke="rgba(255,255,255,0.12)" />
+        <line x1="30" y1="20" x2="30" y2="88" stroke="rgba(255,255,255,0.12)" />
+        <polyline points="30,72 95,66 160,62 225,52 290,47 355,53 420,36 490,31" fill="none" stroke="#8fd4ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <polyline points="30,72 95,66 160,62 225,52 290,47 355,53 420,36 490,31 490,88 30,88" fill="rgba(143,212,255,0.12)" />
+        <text x="30" y="104">T-70</text>
+        <text x="240" y="104">T-35</text>
+        <text x="460" y="104">NOW</text>
+      </svg>
+    </div>
 
-      <div class="timeline">
-        <div class="bar" style="height: 32%"></div>
-        <div class="bar" style="height: 38%"></div>
-        <div class="bar" style="height: 42%"></div>
-        <div class="bar" style="height: 55%"></div>
-        <div class="bar" style="height: 61%"></div>
-        <div class="bar" style="height: 58%"></div>
-        <div class="bar" style="height: 72%"></div>
-        <div class="bar" style="height: 78%"></div>
+    <div class="console-card">
+      <div class="panel-title">Operational Events</div>
+      <div class="events">
+        <div class="event"><span>Kp threshold crossed</span><strong>05:02</strong></div>
+        <div class="event"><span>3 objects flagged</span><strong>05:11</strong></div>
+        <div class="event"><span>Propagation batch complete</span><strong>05:23</strong></div>
       </div>
     </div>
   </section>
@@ -246,91 +368,95 @@
   <script>
     const canvas = document.getElementById('space');
     const ctx = canvas.getContext('2d');
+    const runStatus = document.getElementById('runStatus');
+
+    const satName = document.getElementById('satName');
+    const satAlt = document.getElementById('satAlt');
+    const satInc = document.getElementById('satInc');
+    const satVel = document.getElementById('satVel');
+    const satRisk = document.getElementById('satRisk');
 
     let w, h, cx, cy, earthR;
+    let paused = false;
+    let selected = null;
 
     function resize() {
       w = canvas.width = innerWidth * devicePixelRatio;
       h = canvas.height = innerHeight * devicePixelRatio;
-
       canvas.style.width = innerWidth + 'px';
       canvas.style.height = innerHeight + 'px';
-
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-
       cx = innerWidth / 2;
-      cy = innerHeight / 2;
-      earthR = Math.min(innerWidth, innerHeight) * 0.18;
+      cy = innerHeight / 2 + 6;
+      earthR = Math.min(innerWidth, innerHeight) * 0.215;
     }
 
     addEventListener('resize', resize);
     resize();
 
-    const stars = Array.from({ length: 180 }, () => ({
-      x: Math.random() * innerWidth,
-      y: Math.random() * innerHeight,
-      r: Math.random() * 1.3 + 0.2,
+    const stars = Array.from({ length: 150 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.1 + 0.15,
       a: Math.random() * Math.PI * 2
     }));
 
     const orbitPlanes = [
-      { tilt: -0.8, squash: 0.28 },
-      { tilt: -0.45, squash: 0.4 },
-      { tilt: 0, squash: 0.5 },
-      { tilt: 0.45, squash: 0.4 },
-      { tilt: 0.8, squash: 0.28 }
+      { tilt: -0.72, squash: 0.31, radius: 1.53 },
+      { tilt: -0.42, squash: 0.43, radius: 1.62 },
+      { tilt: -0.12, squash: 0.52, radius: 1.70 },
+      { tilt: 0.22, squash: 0.48, radius: 1.58 },
+      { tilt: 0.54, squash: 0.36, radius: 1.66 },
+      { tilt: 0.84, squash: 0.28, radius: 1.74 }
     ];
 
     const sats = Array.from({ length: 42 }, (_, i) => {
       const plane = orbitPlanes[i % orbitPlanes.length];
+      const risk = i % 14 === 0 ? 'Elevated' : i % 6 === 0 ? 'Moderate' : 'Nominal';
 
       return {
-        angle: (i / 42) * Math.PI * 2,
-        speed: 0.003 + (i % 5) * 0.0004,
-        radius: 1.35 + (i % 6) * 0.08,
-        tilt: plane.tilt,
-        squash: plane.squash,
+        id: 'STARLINK-' + String(2900 + i),
+        angle: (i / 42) * Math.PI * 2 + (i % 3) * 0.2,
+        speed: 0.0026 + (i % 5) * 0.00042,
+        plane,
+        altitude: 525 + (i % 10) * 7,
+        inclination: 53 + (i % 6) * 3.4,
+        velocity: 7.58 + (i % 5) * 0.018,
+        risk,
+        sx: 0,
+        sy: 0,
+        depth: 0,
         pulse: Math.random() * Math.PI * 2
       };
     });
 
     function drawStars(t) {
       for (const s of stars) {
-        const alpha = 0.2 + Math.sin(t * 0.001 + s.a) * 0.3;
-
+        const alpha = 0.12 + Math.sin(t * 0.001 + s.a) * 0.18;
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${Math.max(0.04, alpha)})`;
+        ctx.arc(s.x * innerWidth, s.y * innerHeight, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
     function drawEarth(t) {
-      const glow = ctx.createRadialGradient(cx, cy, earthR * 0.7, cx, cy, earthR * 1.8);
-      glow.addColorStop(0, 'rgba(90,180,255,0.26)');
-      glow.addColorStop(1, 'rgba(90,180,255,0)');
-
-      ctx.beginPath();
+      const rot = t * 0.00018;
+      const glow = ctx.createRadialGradient(cx, cy, earthR * 0.78, cx, cy, earthR * 1.95);
+      glow.addColorStop(0, 'rgba(100,185,255,0.24)');
+      glow.addColorStop(1, 'rgba(100,185,255,0)');
       ctx.fillStyle = glow;
-      ctx.arc(cx, cy, earthR * 1.8, 0, Math.PI * 2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, earthR * 1.95, 0, Math.PI * 2);
       ctx.fill();
 
-      const g = ctx.createRadialGradient(
-        cx - earthR * 0.35,
-        cy - earthR * 0.35,
-        earthR * 0.12,
-        cx,
-        cy,
-        earthR
-      );
-
-      g.addColorStop(0, '#8feaff');
-      g.addColorStop(0.3, '#2f83da');
-      g.addColorStop(0.72, '#0d356f');
-      g.addColorStop(1, '#020a18');
-
+      const globe = ctx.createRadialGradient(cx - earthR * 0.35, cy - earthR * 0.38, earthR * 0.08, cx, cy, earthR);
+      globe.addColorStop(0, '#9ceaff');
+      globe.addColorStop(0.30, '#2c83d9');
+      globe.addColorStop(0.74, '#0b3269');
+      globe.addColorStop(1, '#020816');
+      ctx.fillStyle = globe;
       ctx.beginPath();
-      ctx.fillStyle = g;
       ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
       ctx.fill();
 
@@ -339,97 +465,139 @@
       ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
       ctx.clip();
 
-      const rot = t * 0.00025;
-
-      for (let i = 0; i < 7; i++) {
-        const x = cx + Math.sin(rot + i * 1.5) * earthR * 0.6;
-        const y = cy + Math.cos(rot * 0.7 + i) * earthR * 0.38;
-
-        ctx.fillStyle = i % 2 ? '#34b774' : '#2da86d';
-
+      for (let i = 0; i < 8; i++) {
+        const x = cx + Math.sin(rot + i * 1.55) * earthR * 0.64;
+        const y = cy + Math.cos(rot * 0.82 + i) * earthR * 0.42;
+        ctx.fillStyle = i % 2 ? '#35b979' : '#2ca66c';
         ctx.beginPath();
-        ctx.ellipse(
-          x,
-          y,
-          earthR * 0.24,
-          earthR * 0.08,
-          rot + i,
-          0,
-          Math.PI * 2
-        );
+        ctx.ellipse(x, y, earthR * 0.22, earthR * 0.07, rot + i, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const x = cx + Math.sin(-rot * 1.7 + i * 1.9) * earthR * 0.68;
+        const y = cy + Math.cos(rot + i) * earthR * 0.38;
+        ctx.fillStyle = 'rgba(255,255,255,0.13)';
+        ctx.beginPath();
+        ctx.ellipse(x, y, earthR * 0.22, earthR * 0.035, rot - i, 0, Math.PI * 2);
         ctx.fill();
       }
 
       ctx.restore();
+
+      const shadow = ctx.createRadialGradient(cx - earthR * 0.32, cy - earthR * 0.32, earthR * 0.10, cx + earthR * 0.34, cy + earthR * 0.24, earthR);
+      shadow.addColorStop(0, 'rgba(255,255,255,0.14)');
+      shadow.addColorStop(0.56, 'rgba(0,0,0,0)');
+      shadow.addColorStop(1, 'rgba(0,0,0,0.58)');
+      ctx.fillStyle = shadow;
+      ctx.beginPath();
+      ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    function drawOrbits() {
-      for (const p of orbitPlanes) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(p.tilt);
-
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-        ctx.lineWidth = 1;
-        ctx.ellipse(0, 0, earthR * 1.55, earthR * 1.55 * p.squash, 0, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.restore();
-      }
-    }
-
-    function drawSatellite(sat, t) {
-      sat.angle += sat.speed;
-      sat.pulse += 0.08;
-
-      const r = earthR * sat.radius;
-
+    function project(sat) {
+      const p = sat.plane;
+      const r = earthR * p.radius;
       const x0 = Math.cos(sat.angle) * r;
-      const y0 = Math.sin(sat.angle) * r * sat.squash;
-
-      const cos = Math.cos(sat.tilt);
-      const sin = Math.sin(sat.tilt);
-
+      const y0 = Math.sin(sat.angle) * r * p.squash;
+      const cos = Math.cos(p.tilt);
+      const sin = Math.sin(p.tilt);
       const x = x0 * cos - y0 * sin;
       const y = x0 * sin + y0 * cos;
+      sat.sx = cx + x;
+      sat.sy = cy + y;
+      sat.depth = Math.sin(sat.angle);
+    }
 
-      const px = cx + x;
-      const py = cy + y;
+    function drawOrbitPlane(p) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(p.tilt);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255,255,255,0.105)';
+      ctx.lineWidth = 1;
+      ctx.ellipse(0, 0, earthR * p.radius, earthR * p.radius * p.squash, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-      const depth = Math.sin(sat.angle);
-      const scale = depth > 0 ? 1.1 : 0.72;
-      const alpha = depth > 0 ? 1 : 0.34;
+    function drawSatellite(sat, t, forceSelected = false) {
+      project(sat);
+      const front = sat.depth > 0;
+      const scale = front ? 1.05 : 0.68;
+      const alpha = forceSelected ? 1 : front ? 0.92 : 0.28;
+      const blink = 0.78 + Math.sin(t * 0.006 + sat.pulse) * 0.22;
 
       ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(sat.tilt + sat.angle);
-
-      ctx.globalAlpha = alpha;
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = 'white';
-
+      ctx.translate(sat.sx, sat.sy);
+      ctx.rotate(sat.plane.tilt + sat.angle);
+      ctx.globalAlpha = alpha * blink;
+      ctx.shadowBlur = forceSelected ? 20 : 8;
+      ctx.shadowColor = 'rgba(255,255,255,0.8)';
       ctx.fillStyle = '#ffffff';
 
-      ctx.fillRect(-2 * scale, -2 * scale, 4 * scale, 4 * scale);
+      // Starlink-like simplified bus and flat solar arrays.
+      ctx.fillRect(-1.8 * scale, -1.8 * scale, 3.6 * scale, 3.6 * scale);
+      ctx.fillStyle = 'rgba(230,242,255,0.92)';
+      ctx.fillRect(-11 * scale, -0.9 * scale, 7.2 * scale, 1.8 * scale);
+      ctx.fillRect(3.8 * scale, -0.9 * scale, 7.2 * scale, 1.8 * scale);
 
-      ctx.fillStyle = 'rgba(220,235,255,0.95)';
-      ctx.fillRect(-12 * scale, -1.1 * scale, 8 * scale, 2.2 * scale);
-      ctx.fillRect(4 * scale, -1.1 * scale, 8 * scale, 2.2 * scale);
+      if (forceSelected) {
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(143,212,255,0.95)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+      }
 
       ctx.restore();
       ctx.globalAlpha = 1;
     }
 
+    function setSelected(sat) {
+      selected = sat;
+      paused = Boolean(sat);
+      runStatus.textContent = paused ? 'Paused' : 'Live';
+      runStatus.className = paused ? 'kpi-value status-warning' : 'kpi-value status-live';
+
+      if (!sat) return;
+
+      satName.textContent = sat.id;
+      satAlt.textContent = sat.altitude + ' km';
+      satInc.textContent = sat.inclination.toFixed(1) + '°';
+      satVel.textContent = sat.velocity.toFixed(2) + ' km/s';
+      satRisk.textContent = sat.risk;
+    }
+
+    canvas.addEventListener('click', (event) => {
+      let hit = null;
+      for (const sat of sats) {
+        project(sat);
+        if (sat.depth < -0.75) continue;
+        const d = Math.hypot(event.clientX - sat.sx, event.clientY - sat.sy);
+        if (d < 18) {
+          hit = sat;
+          break;
+        }
+      }
+      setSelected(hit);
+    });
+
     function animate(t) {
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-
       drawStars(t);
-      drawOrbits();
 
-      for (const s of sats) drawSatellite(s, t);
+      for (const p of orbitPlanes) drawOrbitPlane(p);
 
+      if (!paused) {
+        for (const sat of sats) sat.angle += sat.speed;
+      }
+
+      for (const sat of sats) drawSatellite(sat, t, false);
       drawEarth(t);
+
+      if (selected) drawSatellite(selected, t, true);
 
       requestAnimationFrame(animate);
     }
