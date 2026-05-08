@@ -1,7 +1,6 @@
-cat > .github/workflows/main.yml <<'EOF'
 name: Deploy GitHub Pages
 
-'on':
+on:
   push:
     branches:
       - main
@@ -18,11 +17,11 @@ concurrency:
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -39,4 +38,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-EOF
