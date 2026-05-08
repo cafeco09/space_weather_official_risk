@@ -1,404 +1,440 @@
-cat > docs/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Starlink Space Weather Risk Globe</title>
-<style>
-* { box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operational Space Weather Globe</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body {
-  margin: 0;
-  overflow: hidden;
-  background: radial-gradient(circle at 70% 35%, #112b4f, #030713 58%, #000);
-  color: white;
-  font-family: Arial, sans-serif;
-}
+    :root {
+      --bg: #040913;
+      --panel: rgba(7, 16, 30, 0.72);
+      --border: rgba(180, 210, 255, 0.14);
+      --text: #eef5ff;
+      --muted: #9cb0c8;
+      --orbit: rgba(255,255,255,0.12);
+      --accent: #8fd4ff;
+      --warn: #f7c66d;
+      --danger: #ff7d7d;
+    }
 
-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-}
+    body {
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(40,90,180,0.22), transparent 30%),
+        radial-gradient(circle at 70% 30%, rgba(40,130,255,0.12), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, Arial, sans-serif;
+    }
 
-.hud {
-  position: fixed;
-  left: 42px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 430px;
-  padding: 28px;
-  border-radius: 28px;
-  background: rgba(4, 12, 28, 0.68);
-  border: 1px solid rgba(180, 230, 255, 0.22);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 30px 100px rgba(0,0,0,0.45);
-  z-index: 5;
-}
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
 
-.eyebrow {
-  color: #9eeaff;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.75rem;
-  font-weight: 800;
-}
+    .topbar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      z-index: 10;
+    }
 
-h1 {
-  margin: 0;
-  font-size: clamp(3rem, 7vw, 5.6rem);
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-}
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
 
-.hud p {
-  color: #b9cce5;
-  line-height: 1.6;
-}
+    .kpi-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 11px;
-  margin-top: 22px;
-}
+    .kpi-value {
+      margin-top: 8px;
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
 
-.cards div {
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.08);
-}
+    .bottom-panel {
+      position: fixed;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+      z-index: 10;
+    }
 
-.cards strong {
-  display: block;
-  font-size: 1.35rem;
-}
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      border-radius: 22px;
+      padding: 18px;
+    }
 
-.cards span {
-  color: #9fb3c8;
-  font-size: 0.78rem;
-}
+    .panel-title {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
 
-.info {
-  position: fixed;
-  right: 34px;
-  bottom: 30px;
-  width: 300px;
-  padding: 20px;
-  border-radius: 22px;
-  background: rgba(4, 12, 28, 0.72);
-  border: 1px solid rgba(180, 230, 255, 0.2);
-  backdrop-filter: blur(18px);
-  color: #cfe4f6;
-  z-index: 6;
-}
+    .satellite-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
 
-.info strong {
-  color: white;
-  display: block;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-}
+    .sat-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
 
-.info small {
-  color: #8fa8c2;
-}
+    .sat-name {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
 
-.paused {
-  color: #9eeaff;
-}
-</style>
+    .sat-meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .timeline {
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      height: 160px;
+      margin-top: 8px;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 10px 10px 4px 4px;
+      background: linear-gradient(to top, rgba(70,140,255,0.28), rgba(130,220,255,0.82));
+      min-height: 24px;
+    }
+
+    .status-live {
+      color: #9df0c7;
+    }
+
+    .status-warning {
+      color: var(--warn);
+    }
+
+    .status-critical {
+      color: var(--danger);
+    }
+
+    @media (max-width: 1100px) {
+      .topbar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bottom-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .satellite-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-<canvas id="space"></canvas>
+  <canvas id="space"></canvas>
 
-<section class="hud">
-  <div class="eyebrow">Starlink LEO Risk Intelligence</div>
-  <h1>Space Weather Risk Globe</h1>
-  <p>
-    White Starlink-style satellites orbit Earth. Click any satellite to pause
-    and inspect its altitude, orbital plane and drag-risk class.
-  </p>
+  <section class="topbar">
+    <div class="kpi">
+      <div class="kpi-label">Satellites Tracked</div>
+      <div class="kpi-value">42</div>
+    </div>
 
-  <div class="cards">
-    <div><strong>42</strong><span>Starlink-style craft</span></div>
-    <div><strong>Corrected</strong><span>orbital planes</span></div>
-    <div><strong>Click</strong><span>to pause</span></div>
-  </div>
-</section>
+    <div class="kpi">
+      <div class="kpi-label">Average Altitude</div>
+      <div class="kpi-value">548 km</div>
+    </div>
 
-<div class="info" id="info">
-  <strong>Hover/click a satellite</strong>
-  <span>Clicking a white Starlink craft pauses the scene.</span><br />
-  <small>Status: <span id="status">running</span></small>
-</div>
+    <div class="kpi">
+      <div class="kpi-label">KP Index</div>
+      <div class="kpi-value status-warning">5.3</div>
+    </div>
 
-<script>
-const canvas = document.getElementById("space");
-const ctx = canvas.getContext("2d");
-const info = document.getElementById("info");
-const statusText = document.getElementById("status");
+    <div class="kpi">
+      <div class="kpi-label">Drag Severity</div>
+      <div class="kpi-value status-warning">Moderate</div>
+    </div>
 
-let W, H, cx, cy, earthR;
-let paused = false;
-let selected = null;
-let mouse = { x: -9999, y: -9999 };
+    <div class="kpi">
+      <div class="kpi-label">High Risk Objects</div>
+      <div class="kpi-value status-critical">3</div>
+    </div>
 
-function resize() {
-  W = canvas.width = innerWidth * devicePixelRatio;
-  H = canvas.height = innerHeight * devicePixelRatio;
-  canvas.style.width = innerWidth + "px";
-  canvas.style.height = innerHeight + "px";
-  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    <div class="kpi">
+      <div class="kpi-label">Propagation Status</div>
+      <div class="kpi-value status-live">Live</div>
+    </div>
+  </section>
 
-  cx = innerWidth * 0.66;
-  cy = innerHeight * 0.5;
-  earthR = Math.min(innerWidth, innerHeight) * 0.22;
-}
+  <section class="bottom-panel">
+    <div class="panel">
+      <div class="panel-title">Selected Satellites</div>
 
-addEventListener("resize", resize);
-resize();
+      <div class="satellite-grid">
+        <div class="sat-item">
+          <div class="sat-name">STARLINK-3217</div>
+          <div class="sat-meta">
+            Altitude: 552 km<br>
+            Inclination: 53.2°<br>
+            Velocity: 7.66 km/s<br>
+            Drag Risk: Nominal
+          </div>
+        </div>
 
-const stars = Array.from({ length: 260 }, () => ({
-  x: Math.random() * innerWidth,
-  y: Math.random() * innerHeight,
-  r: Math.random() * 1.4 + 0.2,
-  a: Math.random() * Math.PI * 2
-}));
+        <div class="sat-item">
+          <div class="sat-name">STARLINK-2984</div>
+          <div class="sat-meta">
+            Altitude: 534 km<br>
+            Inclination: 70.1°<br>
+            Velocity: 7.61 km/s<br>
+            Drag Risk: Elevated
+          </div>
+        </div>
+      </div>
+    </div>
 
-const orbitalPlanes = [
-  { tilt: -0.62, squash: 0.34 },
-  { tilt: -0.34, squash: 0.42 },
-  { tilt: 0.00, squash: 0.48 },
-  { tilt: 0.34, squash: 0.42 },
-  { tilt: 0.62, squash: 0.34 },
-  { tilt: 0.95, squash: 0.28 }
-];
+    <div class="panel">
+      <div class="panel-title">Atmospheric Density Trend</div>
 
-const satellites = Array.from({ length: 42 }, (_, i) => {
-  const plane = orbitalPlanes[i % orbitalPlanes.length];
-  return {
-    id: "STARLINK-" + String(3000 + i),
-    plane: i % orbitalPlanes.length,
-    angle: (i / 42) * Math.PI * 2 + Math.random() * 0.25,
-    speed: 0.0035 + (i % 5) * 0.00045,
-    radius: 1.28 + (i % 7) * 0.065,
-    tilt: plane.tilt,
-    squash: plane.squash,
-    altitude: 520 + (i % 9) * 12,
-    risk: i % 11 === 0 ? "Elevated" : i % 5 === 0 ? "Moderate" : "Nominal",
-    screenX: 0,
-    screenY: 0,
-    visible: true,
-    twinkle: Math.random() * Math.PI * 2
-  };
-});
+      <div class="timeline">
+        <div class="bar" style="height: 32%"></div>
+        <div class="bar" style="height: 38%"></div>
+        <div class="bar" style="height: 42%"></div>
+        <div class="bar" style="height: 55%"></div>
+        <div class="bar" style="height: 61%"></div>
+        <div class="bar" style="height: 58%"></div>
+        <div class="bar" style="height: 72%"></div>
+        <div class="bar" style="height: 78%"></div>
+      </div>
+    </div>
+  </section>
 
-function drawStars(t) {
-  for (const s of stars) {
-    const alpha = 0.25 + Math.sin(t * 0.002 + s.a) * 0.35;
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(255,255,255,${Math.max(0.08, alpha)})`;
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+  <script>
+    const canvas = document.getElementById('space');
+    const ctx = canvas.getContext('2d');
 
-function drawEarth(t) {
-  const rot = t * 0.00042;
+    let w, h, cx, cy, earthR;
 
-  const glow = ctx.createRadialGradient(cx, cy, earthR * 0.85, cx, cy, earthR * 1.6);
-  glow.addColorStop(0, "rgba(90,190,255,0.3)");
-  glow.addColorStop(1, "rgba(90,190,255,0)");
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(cx, cy, earthR * 1.6, 0, Math.PI * 2);
-  ctx.fill();
+    function resize() {
+      w = canvas.width = innerWidth * devicePixelRatio;
+      h = canvas.height = innerHeight * devicePixelRatio;
 
-  const g = ctx.createRadialGradient(cx - earthR * 0.35, cy - earthR * 0.35, earthR * 0.1, cx, cy, earthR);
-  g.addColorStop(0, "#9deeff");
-  g.addColorStop(0.28, "#287fd8");
-  g.addColorStop(0.73, "#0c356f");
-  g.addColorStop(1, "#030b1c");
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
 
-  ctx.beginPath();
-  ctx.fillStyle = g;
-  ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
-  ctx.fill();
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
-  ctx.clip();
-
-  for (let i = 0; i < 9; i++) {
-    const x = cx + Math.sin(rot + i * 1.6) * earthR * 0.62;
-    const y = cy + Math.cos(rot * 0.8 + i) * earthR * 0.44;
-    ctx.fillStyle = i % 2 ? "#39b979" : "#2ea76d";
-    ctx.beginPath();
-    ctx.ellipse(x, y, earthR * 0.23, earthR * 0.075, rot + i, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.restore();
-
-  const shade = ctx.createRadialGradient(cx - earthR * 0.35, cy - earthR * 0.35, earthR * 0.15, cx + earthR * 0.3, cy + earthR * 0.2, earthR);
-  shade.addColorStop(0, "rgba(255,255,255,0.16)");
-  shade.addColorStop(0.56, "rgba(0,0,0,0)");
-  shade.addColorStop(1, "rgba(0,0,0,0.58)");
-  ctx.fillStyle = shade;
-  ctx.beginPath();
-  ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function projectSatellite(sat) {
-  const r = earthR * sat.radius;
-  const x0 = Math.cos(sat.angle) * r;
-  const y0 = Math.sin(sat.angle) * r * sat.squash;
-
-  const cos = Math.cos(sat.tilt);
-  const sin = Math.sin(sat.tilt);
-
-  const x = x0 * cos - y0 * sin;
-  const y = x0 * sin + y0 * cos;
-  const depth = Math.sin(sat.angle);
-
-  sat.screenX = cx + x;
-  sat.screenY = cy + y;
-  sat.visible = depth > -0.85;
-
-  return { x, y, depth, r };
-}
-
-function drawOrbits() {
-  for (const p of orbitalPlanes) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(p.tilt);
-
-    ctx.strokeStyle = "rgba(180,230,255,0.11)";
-    ctx.lineWidth = 1;
-
-    ctx.beginPath();
-    ctx.ellipse(0, 0, earthR * 1.62, earthR * 1.62 * p.squash, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-}
-
-function drawStarlinkSat(sat, t) {
-  const { depth } = projectSatellite(sat);
-
-  const scale = depth > 0 ? 1.18 : 0.72;
-  const alpha = depth > 0 ? 1 : 0.36;
-  const twinkle = 0.75 + Math.sin(t * 0.008 + sat.twinkle) * 0.25;
-
-  ctx.save();
-  ctx.translate(sat.screenX, sat.screenY);
-  ctx.rotate(sat.tilt + sat.angle);
-
-  ctx.globalAlpha = alpha * twinkle;
-  ctx.shadowBlur = selected === sat ? 28 : 16;
-  ctx.shadowColor = "white";
-
-  /* Starlink-like: white body + two flat solar panels */
-  ctx.fillStyle = "#ffffff";
-
-  ctx.fillRect(-2.2 * scale, -2.2 * scale, 4.4 * scale, 4.4 * scale);
-
-  ctx.fillStyle = "rgba(230,245,255,0.92)";
-  ctx.fillRect(-15 * scale, -1.4 * scale, 10 * scale, 2.8 * scale);
-  ctx.fillRect(5 * scale, -1.4 * scale, 10 * scale, 2.8 * scale);
-
-  ctx.strokeStyle = "rgba(255,255,255,0.85)";
-  ctx.lineWidth = 0.7;
-  ctx.strokeRect(-15 * scale, -1.4 * scale, 10 * scale, 2.8 * scale);
-  ctx.strokeRect(5 * scale, -1.4 * scale, 10 * scale, 2.8 * scale);
-
-  if (selected === sat) {
-    ctx.beginPath();
-    ctx.strokeStyle = "#9eeaff";
-    ctx.lineWidth = 2;
-    ctx.arc(0, 0, 18 * scale, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  ctx.restore();
-  ctx.globalAlpha = 1;
-}
-
-function updateInfo(sat) {
-  selected = sat;
-  paused = true;
-  statusText.textContent = "paused";
-  statusText.className = "paused";
-
-  info.innerHTML = `
-    <strong>${sat.id}</strong>
-    Altitude: ${sat.altitude} km<br />
-    Plane: ${sat.plane + 1} / ${orbitalPlanes.length}<br />
-    Drag risk: ${sat.risk}<br />
-    <small>Click empty space to resume.</small>
-  `;
-}
-
-canvas.addEventListener("mousemove", e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
-
-canvas.addEventListener("click", e => {
-  let hit = null;
-
-  for (const sat of satellites) {
-    const d = Math.hypot(e.clientX - sat.screenX, e.clientY - sat.screenY);
-    if (d < 18 && sat.visible) {
-      hit = sat;
-      break;
+      cx = innerWidth / 2;
+      cy = innerHeight / 2;
+      earthR = Math.min(innerWidth, innerHeight) * 0.18;
     }
-  }
 
-  if (hit) {
-    updateInfo(hit);
-  } else {
-    selected = null;
-    paused = false;
-    statusText.textContent = "running";
-    statusText.className = "";
-    info.innerHTML = `
-      <strong>Hover/click a satellite</strong>
-      <span>Clicking a white Starlink craft pauses the scene.</span><br />
-      <small>Status: <span id="status">running</span></small>
-    `;
-  }
-});
+    addEventListener('resize', resize);
+    resize();
 
-function animate(t) {
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
+    const stars = Array.from({ length: 180 }, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight,
+      r: Math.random() * 1.3 + 0.2,
+      a: Math.random() * Math.PI * 2
+    }));
 
-  drawStars(t);
-  drawOrbits();
+    const orbitPlanes = [
+      { tilt: -0.8, squash: 0.28 },
+      { tilt: -0.45, squash: 0.4 },
+      { tilt: 0, squash: 0.5 },
+      { tilt: 0.45, squash: 0.4 },
+      { tilt: 0.8, squash: 0.28 }
+    ];
 
-  if (!paused) {
-    for (const sat of satellites) sat.angle += sat.speed;
-  }
+    const sats = Array.from({ length: 42 }, (_, i) => {
+      const plane = orbitPlanes[i % orbitPlanes.length];
 
-  for (const sat of satellites) drawStarlinkSat(sat, t);
+      return {
+        angle: (i / 42) * Math.PI * 2,
+        speed: 0.003 + (i % 5) * 0.0004,
+        radius: 1.35 + (i % 6) * 0.08,
+        tilt: plane.tilt,
+        squash: plane.squash,
+        pulse: Math.random() * Math.PI * 2
+      };
+    });
 
-  drawEarth(t);
+    function drawStars(t) {
+      for (const s of stars) {
+        const alpha = 0.2 + Math.sin(t * 0.001 + s.a) * 0.3;
 
-  if (selected) drawStarlinkSat(selected, t);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
 
-  requestAnimationFrame(animate);
-}
+    function drawEarth(t) {
+      const glow = ctx.createRadialGradient(cx, cy, earthR * 0.7, cx, cy, earthR * 1.8);
+      glow.addColorStop(0, 'rgba(90,180,255,0.26)');
+      glow.addColorStop(1, 'rgba(90,180,255,0)');
 
-animate(0);
-</script>
+      ctx.beginPath();
+      ctx.fillStyle = glow;
+      ctx.arc(cx, cy, earthR * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      const g = ctx.createRadialGradient(
+        cx - earthR * 0.35,
+        cy - earthR * 0.35,
+        earthR * 0.12,
+        cx,
+        cy,
+        earthR
+      );
+
+      g.addColorStop(0, '#8feaff');
+      g.addColorStop(0.3, '#2f83da');
+      g.addColorStop(0.72, '#0d356f');
+      g.addColorStop(1, '#020a18');
+
+      ctx.beginPath();
+      ctx.fillStyle = g;
+      ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
+      ctx.clip();
+
+      const rot = t * 0.00025;
+
+      for (let i = 0; i < 7; i++) {
+        const x = cx + Math.sin(rot + i * 1.5) * earthR * 0.6;
+        const y = cy + Math.cos(rot * 0.7 + i) * earthR * 0.38;
+
+        ctx.fillStyle = i % 2 ? '#34b774' : '#2da86d';
+
+        ctx.beginPath();
+        ctx.ellipse(
+          x,
+          y,
+          earthR * 0.24,
+          earthR * 0.08,
+          rot + i,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawOrbits() {
+      for (const p of orbitPlanes) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(p.tilt);
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.ellipse(0, 0, earthR * 1.55, earthR * 1.55 * p.squash, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    function drawSatellite(sat, t) {
+      sat.angle += sat.speed;
+      sat.pulse += 0.08;
+
+      const r = earthR * sat.radius;
+
+      const x0 = Math.cos(sat.angle) * r;
+      const y0 = Math.sin(sat.angle) * r * sat.squash;
+
+      const cos = Math.cos(sat.tilt);
+      const sin = Math.sin(sat.tilt);
+
+      const x = x0 * cos - y0 * sin;
+      const y = x0 * sin + y0 * cos;
+
+      const px = cx + x;
+      const py = cy + y;
+
+      const depth = Math.sin(sat.angle);
+      const scale = depth > 0 ? 1.1 : 0.72;
+      const alpha = depth > 0 ? 1 : 0.34;
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(sat.tilt + sat.angle);
+
+      ctx.globalAlpha = alpha;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = 'white';
+
+      ctx.fillStyle = '#ffffff';
+
+      ctx.fillRect(-2 * scale, -2 * scale, 4 * scale, 4 * scale);
+
+      ctx.fillStyle = 'rgba(220,235,255,0.95)';
+      ctx.fillRect(-12 * scale, -1.1 * scale, 8 * scale, 2.2 * scale);
+      ctx.fillRect(4 * scale, -1.1 * scale, 8 * scale, 2.2 * scale);
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    function animate(t) {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+      drawStars(t);
+      drawOrbits();
+
+      for (const s of sats) drawSatellite(s, t);
+
+      drawEarth(t);
+
+      requestAnimationFrame(animate);
+    }
+
+    animate(0);
+  </script>
 </body>
 </html>
-EOF
