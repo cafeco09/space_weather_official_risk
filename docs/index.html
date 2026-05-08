@@ -8,111 +8,41 @@ cat > docs/index.html <<'EOF'
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-    <section class="hero">
-      <div class="copy">
-        <p class="eyebrow">LEO Satellite Risk Intelligence</p>
-        <h1>Rotating Earth. Live Orbital Risk Simulation.</h1>
-        <p class="subtitle">
-          A visual demo of how changing atmospheric density can increase satellite drag stress across low Earth orbit.
-        </p>
+  <main class="layout">
+    <section class="left">
+      <p class="eyebrow">LEO Satellite Risk Intelligence</p>
+      <h1>Space Weather Risk Globe</h1>
+      <p class="subtitle">
+        Interactive orbital-risk visualisation for low Earth orbit satellites under atmospheric drag stress.
+      </p>
 
-        <div class="stats">
-          <div><strong>48</strong><span>visual satellites</span></div>
-          <div><strong>90m</strong><span>propagation window</span></div>
-          <div><strong>Async</strong><span>parallel risk pipeline</span></div>
-        </div>
+      <div class="metrics">
+        <div><strong>64</strong><span>visual satellites</span></div>
+        <div><strong>3</strong><span>risk classes</span></div>
+        <div><strong>90m</strong><span>propagation window</span></div>
       </div>
 
-      <div class="space-scene" id="scene">
-        <div class="starfield"></div>
-
-        <div class="earth">
-          <div class="clouds"></div>
-          <div class="continents"></div>
-          <div class="shine"></div>
-        </div>
-
-        <div id="satelliteLayer"></div>
-
-        <div class="tooltip" id="tooltip">
-          <strong id="tipName">Satellite</strong>
-          <span id="tipRisk">Risk</span>
-          <span id="tipAlt">Altitude</span>
-        </div>
+      <div class="legend">
+        <span><i class="low"></i> Low risk</span>
+        <span><i class="medium"></i> Medium risk</span>
+        <span><i class="high"></i> High risk</span>
       </div>
     </section>
 
-    <section class="panel">
-      <h2>Pipeline flow</h2>
-      <div class="flow">
-        <div>Catalogue ingest</div>
-        <div>Atmosphere proxy</div>
-        <div>Parallel orbit propagation</div>
-        <div>Risk scoring</div>
-      </div>
+    <section class="stage">
+      <canvas id="globe"></canvas>
+      <div id="tooltip" class="tooltip"></div>
     </section>
   </main>
 
-  <script>
-    const satelliteLayer = document.getElementById("satelliteLayer");
-    const tooltip = document.getElementById("tooltip");
-    const tipName = document.getElementById("tipName");
-    const tipRisk = document.getElementById("tipRisk");
-    const tipAlt = document.getElementById("tipAlt");
+  <section class="flow">
+    <div>Catalogue ingest</div>
+    <div>Atmosphere proxy</div>
+    <div>Parallel propagation</div>
+    <div>Risk scoring</div>
+  </section>
 
-    const risks = ["Low", "Low", "Low", "Medium", "Medium", "High"];
-
-    for (let i = 0; i < 48; i++) {
-      const orbit = document.createElement("div");
-      orbit.className = "orbit";
-
-      const size = 330 + Math.random() * 250;
-      const speed = 8 + Math.random() * 18;
-      const tilt = -65 + Math.random() * 130;
-      const delay = Math.random() * -20;
-
-      orbit.style.width = size + "px";
-      orbit.style.height = size + "px";
-      orbit.style.animationDuration = speed + "s";
-      orbit.style.animationDelay = delay + "s";
-      orbit.style.transform = `translate(-50%, -50%) rotate(${tilt}deg)`;
-
-      const sat = document.createElement("button");
-      sat.className = "satellite";
-
-      const risk = risks[Math.floor(Math.random() * risks.length)];
-      const altitude = Math.round(420 + Math.random() * 250);
-
-      sat.dataset.name = "LEO-SAT-" + String(i + 1).padStart(3, "0");
-      sat.dataset.risk = risk;
-      sat.dataset.alt = altitude + " km";
-
-      if (risk === "High") sat.classList.add("risk-high");
-      if (risk === "Medium") sat.classList.add("risk-medium");
-      if (risk === "Low") sat.classList.add("risk-low");
-
-      sat.addEventListener("mouseenter", () => {
-        tipName.textContent = sat.dataset.name;
-        tipRisk.textContent = "Risk: " + sat.dataset.risk;
-        tipAlt.textContent = "Altitude: " + sat.dataset.alt;
-        tooltip.classList.add("show");
-      });
-
-      sat.addEventListener("mousemove", (event) => {
-        const scene = document.getElementById("scene").getBoundingClientRect();
-        tooltip.style.left = event.clientX - scene.left + 18 + "px";
-        tooltip.style.top = event.clientY - scene.top - 18 + "px";
-      });
-
-      sat.addEventListener("mouseleave", () => {
-        tooltip.classList.remove("show");
-      });
-
-      orbit.appendChild(sat);
-      satelliteLayer.appendChild(orbit);
-    }
-  </script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
 EOF
