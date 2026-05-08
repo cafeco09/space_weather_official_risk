@@ -1,4 +1,3 @@
-cat > docs/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -334,7 +333,7 @@ function drawScene(t){
     ctx.save();
     ctx.translate(ex,ey);
     ctx.rotate(s.tilt);
-    ctx.strokeStyle="rgba(255,255,255,.22)";
+    ctx.strokeStyle="rgba(255,255,255,.18)";
     ctx.lineWidth=.8;
     ctx.beginPath(); ctx.ellipse(0,0,s.r,s.r*.36,0,0,Math.PI*2); ctx.stroke();
 
@@ -375,4 +374,3 @@ drawLine("kp",[.2,.26,.35,.45,.62,.72,.68,.56], "#ff8a2a");
 </script>
 </body>
 </html>
-EOF
