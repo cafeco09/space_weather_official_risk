@@ -64,3 +64,11 @@ Create the GitHub repository first if it does not already exist.
 ## Note
 
 This is a simplified engineering demo. For production-grade orbital physics, replace the atmospheric model with real Kp/F10.7/NRLMSISE inputs and use validated propagators.
+
+## Data note
+
+The repository can generate a 42-satellite Starlink sample from public CelesTrak/NORAD GP data using:
+
+```bash
+python fetch_starlink_data.py
+q
