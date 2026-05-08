@@ -1,13 +1,15 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>space-risk-web</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>
+<div id="app">
+  <canvas id="scene"></canvas>
+  <section class="hud">
+    <p class="eyebrow">LEO Satellite Risk Intelligence</p>
+    <h1>Space Weather Risk Globe</h1>
+    <p>Cinematic orbital-risk visualisation for low Earth orbit satellites under atmospheric drag stress.</p>
+    <div class="cards">
+      <div><strong>18</strong><span>satellites</span></div>
+      <div><strong>90m</strong><span>forecast window</span></div>
+      <div><strong>3</strong><span>risk classes</span></div>
+    </div>
+  </section>
+  <div id="tooltip"></div>
+</div>
+<script type="module" src="/src/main.js"></script>

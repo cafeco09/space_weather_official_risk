@@ -1,60 +1,107 @@
-import './style.css'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.js'
+import "./style.css";
+import * as THREE from "three";
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const canvas = document.getElementById("scene");
 
-<div class="ticks"></div>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 1000);
+camera.position.z = 7;
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
-setupCounter(document.querySelector('#counter'))
+const light = new THREE.DirectionalLight(0xffffff, 3);
+light.position.set(5, 3, 5);
+scene.add(light);
+
+const loader = new THREE.TextureLoader();
+const earthTexture = loader.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg");
+
+const earth = new THREE.Mesh(
+  new THREE.SphereGeometry(2, 96, 96),
+  new THREE.MeshStandardMaterial({ map: earthTexture })
+);
+scene.add(earth);
+
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(2.12, 96, 96),
+  new THREE.MeshBasicMaterial({
+    color: 0x4fc3ff,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.BackSide
+  })
+);
+scene.add(atmosphere);
+
+const starsGeo = new THREE.BufferGeometry();
+const stars = [];
+
+for (let i = 0; i < 1500; i++) {
+  stars.push((Math.random() - 0.5) * 70);
+  stars.push((Math.random() - 0.5) * 70);
+  stars.push((Math.random() - 0.5) * 70);
+}
+
+starsGeo.setAttribute("position", new THREE.Float32BufferAttribute(stars, 3));
+
+const starField = new THREE.Points(
+  starsGeo,
+  new THREE.PointsMaterial({ color: 0xffffff, size: 0.025 })
+);
+scene.add(starField);
+
+const satellites = [];
+const colours = [0x77f7d2, 0xffd166, 0xff6b6b];
+
+for (let i = 0; i < 18; i++) {
+  const sat = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 16, 16),
+    new THREE.MeshBasicMaterial({ color: colours[i % colours.length] })
+  );
+
+  sat.userData = {
+    radius: 2.7 + Math.random() * 0.9,
+    speed: 0.25 + Math.random() * 0.4,
+    phase: Math.random() * Math.PI * 2,
+    tilt: Math.random() * Math.PI
+  };
+
+  satellites.push(sat);
+  scene.add(sat);
+}
+
+function animate(time) {
+  const t = time * 0.001;
+
+  earth.rotation.y += 0.002;
+  atmosphere.rotation.y -= 0.001;
+  starField.rotation.y += 0.0001;
+
+  satellites.forEach((sat) => {
+    const d = sat.userData;
+    const a = d.phase + t * d.speed;
+
+    sat.position.set(
+      Math.cos(a) * d.radius,
+      Math.sin(a + d.tilt) * 0.8,
+      Math.sin(a) * d.radius
+    );
+
+    sat.scale.setScalar(1 + Math.sin(t * 5 + d.phase) * 0.25);
+  });
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
