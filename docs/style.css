@@ -5,287 +5,163 @@ cat > docs/style.css <<'EOF'
 
 body {
   margin: 0;
-  font-family: Inter, Arial, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at 50% 10%, #183a66 0%, #08111f 38%, #01040a 100%);
-  color: #eef6ff;
+    radial-gradient(circle at 70% 30%, rgba(64, 150, 255, 0.22), transparent 34%),
+    radial-gradient(circle at 20% 10%, rgba(120, 230, 255, 0.12), transparent 28%),
+    #030814;
+  color: #f2f7ff;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-.app {
-  max-width: 1240px;
+.layout {
+  min-height: 86vh;
+  display: grid;
+  grid-template-columns: 0.9fr 1.25fr;
+  gap: 28px;
+  align-items: center;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 56px 22px;
+  padding: 48px 24px 22px;
 }
 
-.hero {
-  display: grid;
-  grid-template-columns: 0.95fr 1.2fr;
-  gap: 38px;
-  align-items: center;
-  min-height: 78vh;
+.left {
+  padding: 34px;
 }
 
 .eyebrow {
+  margin: 0 0 16px;
   color: #7ee7ff;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-weight: 800;
   font-size: 0.78rem;
+  font-weight: 800;
 }
 
 h1 {
-  font-size: clamp(2.4rem, 6vw, 5.7rem);
-  line-height: 0.95;
   margin: 0;
+  max-width: 680px;
+  font-size: clamp(2.8rem, 7vw, 6.6rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
 }
 
 .subtitle {
-  color: #b9cce5;
-  font-size: 1.18rem;
-  line-height: 1.6;
-  max-width: 620px;
+  max-width: 580px;
+  margin: 24px 0 0;
+  color: #b8c8dc;
+  font-size: 1.15rem;
+  line-height: 1.65;
 }
 
-.stats {
+.metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-  margin-top: 30px;
+  margin-top: 34px;
 }
 
-.stats div {
+.metrics div {
   padding: 18px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(16px);
 }
 
-.stats strong {
+.metrics strong {
   display: block;
-  font-size: 1.75rem;
+  font-size: 1.9rem;
 }
 
-.stats span {
-  color: #a9bdd6;
-  font-size: 0.88rem;
+.metrics span {
+  display: block;
+  color: #9fb2c9;
+  font-size: 0.9rem;
+  margin-top: 4px;
 }
 
-.space-scene {
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 26px;
+  color: #bed0e7;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.low {
+  background: #77f7d2;
+  box-shadow: 0 0 16px #77f7d2;
+}
+
+.medium {
+  background: #ffd166;
+  box-shadow: 0 0 16px #ffd166;
+}
+
+.high {
+  background: #ff6b6b;
+  box-shadow: 0 0 16px #ff6b6b;
+}
+
+.stage {
   position: relative;
-  height: 680px;
+  height: min(78vh, 760px);
+  min-height: 560px;
   border-radius: 38px;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(80,170,255,0.14), transparent 42%),
-    rgba(255,255,255,0.035);
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden;
-  box-shadow: 0 30px 100px rgba(0,0,0,0.5);
-}
-
-.starfield,
-.starfield::before,
-.starfield::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background-image:
-    radial-gradient(#ffffff 1px, transparent 1px),
-    radial-gradient(#7ee7ff 1px, transparent 1px);
-  background-size: 70px 70px, 120px 120px;
-  opacity: 0.35;
-  animation: twinkleField 2.8s ease-in-out infinite alternate;
-}
-
-.starfield::before {
-  transform: translate(35px, 58px);
-  opacity: 0.25;
-  animation-duration: 4.2s;
-}
-
-.starfield::after {
-  transform: translate(90px, 22px);
-  opacity: 0.18;
-  animation-duration: 6s;
-}
-
-.earth {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
   overflow: hidden;
   background:
-    radial-gradient(circle at 30% 24%, #9fefff 0%, #2f8ee6 25%, #0e437c 58%, #061429 100%);
-  box-shadow:
-    inset -42px -30px 70px rgba(0,0,0,0.5),
-    inset 30px 22px 50px rgba(255,255,255,0.16),
-    0 0 90px rgba(72,175,255,0.65);
-  z-index: 4;
+    radial-gradient(circle at center, rgba(93, 181, 255, 0.1), transparent 44%),
+    rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 30px 120px rgba(0, 0, 0, 0.55);
 }
 
-.earth::before {
-  content: "";
-  position: absolute;
-  inset: -18%;
-  border-radius: 50%;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,0.08) 0 1px,
-      transparent 1px 26px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.06) 0 1px,
-      transparent 1px 31px
-    );
-  animation: rotateEarthGrid 7s linear infinite;
-}
-
-.continents {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 38%, #39b979 0 9%, transparent 10%),
-    radial-gradient(ellipse at 43% 55%, #2b9e69 0 12%, transparent 13%),
-    radial-gradient(ellipse at 63% 35%, #31aa72 0 10%, transparent 11%),
-    radial-gradient(ellipse at 61% 66%, #48c985 0 12%, transparent 13%),
-    radial-gradient(ellipse at 38% 73%, #227f58 0 8%, transparent 9%);
-  opacity: 0.82;
-  animation: rotateContinents 10s linear infinite;
-}
-
-.clouds {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 28% 30%, rgba(255,255,255,0.55) 0 8%, transparent 9%),
-    radial-gradient(ellipse at 57% 48%, rgba(255,255,255,0.42) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 42% 72%, rgba(255,255,255,0.35) 0 9%, transparent 10%);
-  animation: rotateClouds 6s linear infinite;
-  z-index: 2;
-}
-
-.shine {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 25% 20%, rgba(255,255,255,0.6), transparent 30%);
-  z-index: 5;
-}
-
-.orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border: 1px solid rgba(126,231,255,0.13);
-  border-radius: 50%;
-  animation-name: orbitSpin;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  z-index: 6;
-}
-
-.satellite {
-  position: absolute;
-  top: 50%;
-  right: -7px;
-  width: 12px;
-  height: 12px;
-  border: 0;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  transform: translateY(-50%);
-  box-shadow:
-    0 0 10px #ffffff,
-    0 0 22px rgba(126,231,255,0.95),
-    0 0 38px rgba(126,231,255,0.55);
-  animation: satellitePulse 1.5s ease-in-out infinite alternate;
-}
-
-.satellite::before,
-.satellite::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  width: 13px;
-  height: 3px;
-  background: #8beeff;
-  border-radius: 999px;
-}
-
-.satellite::before {
-  right: 12px;
-}
-
-.satellite::after {
-  left: 12px;
-}
-
-.satellite:hover {
-  transform: translateY(-50%) scale(1.8);
-  z-index: 30;
-}
-
-.risk-low {
-  background: #a8fff0;
-}
-
-.risk-medium {
-  background: #ffd47a;
-  box-shadow: 0 0 14px #ffd47a, 0 0 32px rgba(255,212,122,0.9);
-}
-
-.risk-high {
-  background: #ff7d7d;
-  box-shadow: 0 0 14px #ff7d7d, 0 0 36px rgba(255,80,80,0.95);
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .tooltip {
   position: absolute;
   display: none;
-  z-index: 100;
   min-width: 170px;
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(3, 11, 24, 0.94);
-  border: 1px solid rgba(126,231,255,0.38);
-  box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+  background: rgba(4, 11, 24, 0.92);
+  border: 1px solid rgba(126, 231, 255, 0.32);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  color: #d9ebff;
   pointer-events: none;
-}
-
-.tooltip.show {
-  display: grid;
-  gap: 5px;
-}
-
-.tooltip strong {
-  color: #ffffff;
-}
-
-.tooltip span {
-  color: #bdd5ef;
+  z-index: 10;
   font-size: 0.9rem;
 }
 
-.panel {
-  margin-top: 34px;
-  padding: 28px;
-  border-radius: 28px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.09);
-}
-
-.panel h2 {
-  margin-top: 0;
+.tooltip strong {
+  display: block;
+  color: white;
+  margin-bottom: 5px;
 }
 
 .flow {
+  max-width: 1260px;
+  margin: 0 auto 34px;
+  padding: 0 24px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
@@ -293,69 +169,22 @@ h1 {
 
 .flow div {
   padding: 18px;
-  border-radius: 18px;
-  background: rgba(126,231,255,0.08);
-  border: 1px solid rgba(126,231,255,0.18);
-  color: #dcecff;
+  border-radius: 20px;
+  background: rgba(126, 231, 255, 0.07);
+  border: 1px solid rgba(126, 231, 255, 0.16);
+  color: #dbeeff;
 }
 
-@keyframes orbitSpin {
-  from {
-    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(calc(var(--tilt, 0deg) + 360deg));
-  }
-}
-
-@keyframes rotateEarthGrid {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes rotateContinents {
-  to {
-    transform: translateX(34px);
-  }
-}
-
-@keyframes rotateClouds {
-  to {
-    transform: translateX(-42px);
-  }
-}
-
-@keyframes satellitePulse {
-  from {
-    opacity: 0.55;
-    filter: brightness(0.9);
-  }
-  to {
-    opacity: 1;
-    filter: brightness(1.4);
-  }
-}
-
-@keyframes twinkleField {
-  from {
-    opacity: 0.18;
-  }
-  to {
-    opacity: 0.5;
-  }
-}
-
-@media (max-width: 900px) {
-  .hero {
+@media (max-width: 980px) {
+  .layout {
     grid-template-columns: 1fr;
   }
 
-  .space-scene {
-    height: 560px;
+  .stage {
+    min-height: 520px;
   }
 
-  .stats,
+  .metrics,
   .flow {
     grid-template-columns: 1fr;
   }
