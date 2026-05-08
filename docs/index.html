@@ -1,979 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SPACE WEATHER RISK • LEO MONITORING</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TERRA·LEO | Unified Space Weather</title>
   <style>
-    :root {
-      --bg-dark: #05070a;
-      --panel-bg: rgba(5, 8, 13, 0.88);
-      --panel-bg-strong: rgba(3, 6, 11, 0.95);
-      --border-color: rgba(255, 255, 255, 0.16);
-      --border-soft: rgba(255, 255, 255, 0.08);
-      --accent-orange: #ff8f1f;
-      --accent-green: #4ade63;
-      --accent-red: #ff3b3b;
-      --accent-blue: #38bdf8;
-      --text-main: #f8fafc;
-      --text-muted: #b5bac7;
-      --text-dim: #7f8796;
-    }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      width: 100vw;
+      background: #03070e;
+      font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
       height: 100vh;
+      width: 100vw;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 38% 44%, rgba(31, 111, 235, 0.22), transparent 30%),
-        radial-gradient(circle at 70% 30%, rgba(14, 165, 233, 0.08), transparent 25%),
-        #05070a;
-      color: var(--text-main);
+      color: #edf4fc;
     }
 
+    /* main app container – no scroll, widescreen dashboard */
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      background: radial-gradient(circle at 20% 30%, #07121f, #010407);
+      overflow: hidden;
+    }
+
+    /* TOP BAR – sleek, low profile, no earth occlusion */
+    .top-metrics {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 12px 24px;
+      background: rgba(2, 9, 18, 0.68);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(70, 140, 210, 0.25);
+      z-index: 12;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .metric-chip {
+      background: rgba(8, 24, 40, 0.55);
+      border-radius: 80px;
+      padding: 5px 16px;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      white-space: nowrap;
+      border: 1px solid rgba(100, 170, 235, 0.2);
+      backdrop-filter: blur(5px);
+      transition: all 0.1s;
+    }
+    .metric-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #86aed5;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      line-height: 1;
+    }
+    .metric-sub {
+      font-size: 9px;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+    .green { color: #4ade80; text-shadow: 0 0 4px #4ade8030; }
+    .amber { color: #fbbf24; text-shadow: 0 0 3px #fbbf2430; }
+    .cyan { color: #7bc5ff; }
+
+    /* MIDDLE SECTION: Earth + right panel — earth fully visible */
+    .middle-area {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 330px;
+      gap: 20px;
+      padding: 16px 24px 12px 24px;
+      min-height: 0;  /* critical for flex child overflow */
+      overflow: hidden;
+    }
+
+    /* EARTH CONTAINER – no overlay, crisp */
+    .earth-stage {
+      background: #02070f;
+      border-radius: 32px;
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(70, 140, 210, 0.3);
+      box-shadow: 0 12px 28px -10px black;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     #earthCanvas {
-      position: fixed;
-      inset: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
+      display: block;
+      border-radius: 30px;
     }
 
-    .hud-noise {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      background-image:
-        linear-gradient(rgba(56, 189, 248, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.025) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 38% 44%, black, transparent 78%);
-    }
-
-    .top-bar {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      height: 120px;
-      display: grid;
-      grid-template-columns: 1.15fr 1fr 0.85fr 1fr;
-      z-index: 10;
-      background: linear-gradient(180deg, rgba(4, 8, 14, 0.94), rgba(2, 5, 10, 0.9));
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38);
-    }
-
-    .kpi {
-      padding: 22px 32px;
+    /* RIGHT PANEL – slim, premium */
+    .satellite-detail {
+      background: rgba(2, 12, 24, 0.78);
+      backdrop-filter: blur(18px);
+      border-radius: 32px;
+      border: 1px solid rgba(80, 150, 225, 0.35);
+      padding: 20px 18px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      border-right: 1px solid var(--border-color);
-    }
-
-    .kpi:last-child {
-      border-right: 0;
-    }
-
-    .kpi-label {
-      font-size: 15px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.055em;
-      margin-bottom: 12px;
-      white-space: nowrap;
-    }
-
-    .kpi-value {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      font-size: 44px;
-      line-height: 1;
-      font-weight: 500;
-      letter-spacing: -0.04em;
-    }
-
-    .kpi-value.small {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      letter-spacing: 0.04em;
-      font-size: 36px;
-    }
-
-    .status-dot {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 18px rgba(74, 222, 99, 0.55);
-      flex: 0 0 auto;
-    }
-
-    .small-status {
-      font-size: 22px;
-      color: var(--accent-green);
-      letter-spacing: -0.02em;
-    }
-
-    .orange {
-      color: var(--accent-orange);
-    }
-
-    .green {
-      color: var(--accent-green);
-    }
-
-    .red {
-      color: var(--accent-red);
-    }
-
-    .side-panel {
-      position: fixed;
-      top: 154px;
-      right: 12px;
-      width: 500px;
-      min-height: 595px;
-      z-index: 10;
-      background: linear-gradient(180deg, rgba(4, 8, 14, 0.94), rgba(2, 5, 10, 0.89));
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 26px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 22px;
-    }
-
-    .panel-title {
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-    }
-
-    .active-pill {
-      color: var(--accent-green);
-      border: 1px solid var(--accent-green);
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 18px;
-      line-height: 1;
-      box-shadow: inset 0 0 20px rgba(74, 222, 99, 0.05);
-    }
-
-    .sat-img {
-      height: 235px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 28px;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 65% 40%, rgba(59, 130, 246, 0.12), transparent 30%),
-        radial-gradient(circle at 25% 70%, rgba(255, 255, 255, 0.08), transparent 20%),
-        #04070c;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .sat-img::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle, rgba(255,255,255,0.75) 1px, transparent 1px);
-      background-size: 28px 28px;
-      opacity: 0.12;
-    }
-
-    .satellite-svg {
-      width: 78%;
-      max-width: 380px;
-      transform: rotate(-18deg);
-      filter: drop-shadow(0 0 18px rgba(96, 165, 250, 0.32));
-      position: relative;
-      z-index: 1;
-    }
-
-    .data-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 20px;
-      align-items: center;
-      padding: 18px 0;
-      border-bottom: 1px solid var(--border-soft);
-      font-size: 24px;
-    }
-
-    .data-row:last-child {
-      border-bottom: 0;
-    }
-
-    .data-label {
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .data-value {
-      color: var(--text-main);
-      font-weight: 500;
-      text-align: right;
-    }
-
-    .bottom-container {
-      position: fixed;
-      bottom: 22px;
-      left: 12px;
-      right: 528px;
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr 0.68fr;
       gap: 16px;
-      z-index: 10;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      box-shadow: 0 12px 24px -8px black;
     }
-
-    .card {
-      min-height: 235px;
-      background: linear-gradient(180deg, rgba(4, 8, 14, 0.92), rgba(2, 5, 10, 0.88));
-      border: 1px solid var(--border-color);
-      border-radius: 9px;
-      padding: 22px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .card-title {
-      font-size: 18px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.035em;
-      margin-bottom: 16px;
+    .sat-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(100, 180, 240, 0.25);
+      padding-bottom: 10px;
+    }
+    .sat-name {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(120deg, #ffffff, #b3d6ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.2px;
+    }
+    .status {
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid #4ade80;
+      border-radius: 60px;
+      padding: 4px 12px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #4ade80;
+    }
+    .sat-icon-deco {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      background: rgba(20, 50, 80, 0.35);
+      border-radius: 48px;
+      padding: 10px;
+      margin: 4px 0;
+    }
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(70, 130, 200, 0.15);
+    }
+    .info-label {
+      color: #8eb2d6;
+      font-weight: 470;
+    }
+    .info-data {
+      font-weight: 530;
+      font-family: 'SF Mono', monospace;
+    }
+    .warning-data { color: #fbbf24; font-weight: 700; }
+    .detail-button {
+      background: rgba(30, 70, 110, 0.6);
+      border: 1px solid #2f6d9b;
+      border-radius: 40px;
+      text-align: center;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 1px;
+      transition: 0.2s;
+      cursor: default;
     }
 
-    canvas.chart {
+    /* BOTTOM DASHBOARD – charts, orbits, events (all visible without scrolling) */
+    .bottom-dash {
+      flex-shrink: 0;
+      padding: 0 24px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 16px;
+    }
+    .card {
+      background: rgba(4, 16, 28, 0.75);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(70, 140, 210, 0.3);
+      padding: 12px 16px;
+    }
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #8eb2da;
+      margin-bottom: 10px;
+    }
+    canvas.small-canvas {
       width: 100%;
-      height: 140px;
+      height: 82px;
       display: block;
     }
-
-    .risk-scale {
-      font-size: 18px;
+    /* orbital distribution grid */
+    .orb-grid {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      margin: 10px 0 4px;
+    }
+    .orb-col {
+      flex: 1;
+      text-align: center;
+      background: rgba(10, 30, 48, 0.5);
+      border-radius: 20px;
+      padding: 8px 3px;
+    }
+    .inc-badge {
+      font-size: 10px;
+      font-weight: 800;
+      background: #112c42;
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 30px;
+      color: #cfebff;
+      margin-bottom: 10px;
+    }
+    .time-label-sm {
+      font-size: 7px;
+      font-weight: 600;
+      color: #698fb3;
+      margin: 6px 0 3px;
+    }
+    .dot-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      margin: 3px 0;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .dot-current { background: #ffbc5e; box-shadow: 0 0 3px #ffbc5e; }
+    .dot-6h { background: #528fc2; }
+    .dot-12h { background: #386f99; }
+    .dot-18h { background: #23537a; }
+    .legend-inline {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 7px;
+    }
+    /* events & risk row */
+    .events-risk {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .event-table {
+      width: 100%;
+      font-size: 9px;
+      border-collapse: collapse;
+    }
+    .event-table th {
+      text-align: left;
+      color: #7aa5ce;
+      font-weight: 600;
+      padding-bottom: 4px;
+    }
+    .event-table td {
+      padding: 5px 2px 4px 0;
+      border-top: 1px solid rgba(80,140,210,0.2);
+    }
+    .sev-m { color: #fbbf24; font-weight: 600; }
+    .risk-bars {
       display: flex;
       flex-direction: column;
-      border-top: 1px solid var(--border-soft);
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 10px;
     }
-
     .risk-item {
-      display: grid;
-      grid-template-columns: 20px 1fr auto;
+      display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 18px 0;
-      border-bottom: 1px solid var(--border-soft);
-      color: var(--text-main);
+      gap: 10px;
+      font-size: 9px;
     }
-
-    .risk-item:last-child {
-      border-bottom: 0;
-    }
-
-    .bullet {
-      width: 14px;
-      height: 14px;
+    .risk-bullet {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      box-shadow: 0 0 12px currentColor;
     }
-
-    .footer-note {
-      position: fixed;
-      left: 18px;
-      bottom: 4px;
-      z-index: 11;
-      color: rgba(181, 186, 199, 0.55);
-      font-size: 11px;
-      letter-spacing: 0.02em;
-    }
-
-    @media (max-width: 1100px) {
-      body {
-        overflow: auto;
-        height: auto;
-        min-height: 100vh;
-      }
-
-      #earthCanvas,
-      .hud-noise {
-        position: fixed;
-      }
-
-      .top-bar,
-      .side-panel,
-      .bottom-container,
-      .footer-note {
-        position: relative;
-        top: auto;
-        right: auto;
-        bottom: auto;
-        left: auto;
-      }
-
-      .top-bar {
-        margin: 12px;
-        grid-template-columns: 1fr;
-        height: auto;
-      }
-
-      .kpi {
-        border-right: 0;
-        border-bottom: 1px solid var(--border-color);
-      }
-
-      .side-panel {
-        width: auto;
-        margin: 16px 12px;
-      }
-
-      .bottom-container {
-        margin: 16px 12px 40px;
-        grid-template-columns: 1fr;
-      }
-    }
+    /* no scroll anywhere */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2f6d98; border-radius: 10px; }
+    .satellite-detail::-webkit-scrollbar { width: 3px; }
   </style>
 </head>
-
 <body>
-  <canvas id="earthCanvas"></canvas>
-  <div class="hud-noise"></div>
+<div class="dashboard">
+  <!-- TOP METRICS (no earth coverage) -->
+  <div class="top-metrics">
+    <div class="metric-chip"><span class="metric-label">🛰️ SYS</span><span class="metric-value green">LEO·ACTIVE</span></div>
+    <div class="metric-chip"><span class="metric-label">SATELLITES</span><span class="metric-value">42</span><span class="metric-sub green">tracked</span></div>
+    <div class="metric-chip"><span class="metric-label">ALTITUDE</span><span class="metric-value">548</span><span class="metric-sub">km</span></div>
+    <div class="metric-chip"><span class="metric-label">KP INDEX</span><span class="metric-value amber">5.3</span><span class="metric-sub amber">G2</span></div>
+    <div class="metric-chip"><span class="metric-label">DRAG</span><span class="metric-value amber">MODERATE</span><span class="metric-sub">↑1.17x</span></div>
+    <div class="metric-chip"><span class="metric-label">⚠️ RISK</span><span class="metric-value amber">3</span><span class="metric-sub">objects</span></div>
+    <div class="metric-chip"><span class="metric-label">UTC</span><span class="metric-value" style="font-size:15px; font-family: monospace;" id="utcLive">--:--:--</span></div>
+  </div>
 
-  <div class="top-bar">
-    <div class="kpi">
-      <div class="kpi-label">Space Weather Risk</div>
-      <div class="kpi-value">
-        <span class="status-dot" id="riskDot"></span>
-        <span id="systemStatus">Operational</span>
-      </div>
+  <!-- MIDDLE: EARTH + RIGHT PANEL (earth fully exposed) -->
+  <div class="middle-area">
+    <div class="earth-stage">
+      <canvas id="earthCanvas" width="800" height="500" style="width:100%; height:100%; object-fit: cover;"></canvas>
     </div>
-
-    <div class="kpi">
-      <div class="kpi-label">Satellites Tracked</div>
-      <div class="kpi-value">
-        <span id="satCount">42</span>
-        <span class="small-status">● Active</span>
+    <div class="satellite-detail">
+      <div class="sat-header">
+        <span class="sat-name">STARLINK-2984</span>
+        <span class="status">● ACTIVE</span>
       </div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">Kp Index</div>
-      <div class="kpi-value">
-        <span class="orange" id="kpValue">5.3</span>
-        <span class="small-status orange" id="kpLabel">Moderate</span>
+      <div class="sat-icon-deco">
+        <span style="font-size: 26px;">🛸</span>
+        <span style="font-size: 22px;">⚡</span>
       </div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">Time (UTC)</div>
-      <div class="kpi-value small" id="clock">00:00:00</div>
+      <div class="info-line"><span class="info-label">Altitude</span><span class="info-data">534 km</span></div>
+      <div class="info-line"><span class="info-label">Inclination</span><span class="info-data">70.1°</span></div>
+      <div class="info-line"><span class="info-label">Velocity</span><span class="info-data">7.61 km/s</span></div>
+      <div class="info-line"><span class="info-label">RAAN</span><span class="info-data">128.7°</span></div>
+      <div class="info-line"><span class="info-label">Arg. Perigee</span><span class="info-data">87.4°</span></div>
+      <div class="info-line"><span class="info-label">Drag Risk</span><span class="info-data warning-data">ELEVATED</span></div>
+      <div class="info-line"><span class="info-label">Atm. Density</span><span class="info-data">1.17× baseline</span></div>
+      <div class="info-line"><span class="info-label">Decay rate</span><span class="info-data">0.018 km/orbit</span></div>
+      <div class="info-line"><span class="info-label">Epoch (UTC)</span><span class="info-data" style="font-family: monospace;">05:24:12</span></div>
+      <div class="detail-button">📡 FULL TELEMETRY →</div>
     </div>
   </div>
 
-  <aside class="side-panel">
-    <div class="panel-header">
-      <div class="panel-title" id="satName">STARLINK-2984</div>
-      <div class="active-pill" id="satStatus">ACTIVE</div>
-    </div>
-
-    <div class="sat-img">
-      <svg class="satellite-svg" viewBox="0 0 760 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="78" width="180" height="104" rx="4" fill="#1e3a8a" stroke="#93c5fd" stroke-width="3"/>
-        <rect x="560" y="78" width="180" height="104" rx="4" fill="#1e3a8a" stroke="#93c5fd" stroke-width="3"/>
-        <g opacity="0.65" stroke="#93c5fd" stroke-width="2">
-          <path d="M50 78v104M80 78v104M110 78v104M140 78v104M170 78v104"/>
-          <path d="M20 104h180M20 130h180M20 156h180"/>
-          <path d="M590 78v104M620 78v104M650 78v104M680 78v104M710 78v104"/>
-          <path d="M560 104h180M560 130h180M560 156h180"/>
-        </g>
-        <path d="M200 130H290M470 130H560" stroke="#cbd5e1" stroke-width="10"/>
-        <rect x="290" y="58" width="180" height="144" rx="12" fill="#cbd5e1" stroke="#f8fafc" stroke-width="4"/>
-        <rect x="325" y="32" width="78" height="42" rx="6" fill="#f59e0b" stroke="#fde68a" stroke-width="3"/>
-        <rect x="340" y="202" width="90" height="34" rx="5" fill="#64748b" stroke="#cbd5e1" stroke-width="3"/>
-        <circle cx="380" cy="130" r="32" fill="#111827" stroke="#f8fafc" stroke-width="5"/>
-        <circle cx="380" cy="130" r="12" fill="#38bdf8"/>
-        <path d="M470 88L526 52M470 172L526 208M290 88L238 52M290 172L238 208" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
-      </svg>
-    </div>
-
-    <div class="data-row">
-      <span class="data-label">Altitude</span>
-      <span class="data-value" id="altitudeValue">534 km</span>
-    </div>
-
-    <div class="data-row">
-      <span class="data-label">Velocity</span>
-      <span class="data-value" id="velocityValue">7.61 km/s</span>
-    </div>
-
-    <div class="data-row">
-      <span class="data-label">Drag Risk</span>
-      <span class="data-value orange" id="dragRiskValue">ELEVATED</span>
-    </div>
-
-    <div class="data-row">
-      <span class="data-label">Atm. Density</span>
-      <span class="data-value" id="densityValue">1.17x baseline</span>
-    </div>
-  </aside>
-
-  <section class="bottom-container">
-    <div class="card">
-      <div class="card-title">
-        <span>Atmospheric Density</span>
-        <span class="orange" id="densityCardValue">1.17x</span>
+  <!-- BOTTOM SECTION (all live data, no overflow) -->
+  <div class="bottom-dash">
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title"><span>🌊 ATMOSPHERIC DENSITY</span><span class="amber">+17%</span></div>
+        <canvas id="densityChart" class="small-canvas" width="400" height="82"></canvas>
+        <div style="display: flex; justify-content: space-between; font-size: 7px; margin-top: 5px; color:#5e86ab;"><span>T-72h</span><span>T-48h</span><span>T-24h</span><span>NOW</span></div>
       </div>
-      <canvas id="densityChart" class="chart"></canvas>
-    </div>
-
-    <div class="card">
-      <div class="card-title">
-        <span>Kp Index (3-Hour)</span>
-        <span class="orange" id="kpCardValue">5.3</span>
+      <div class="card">
+        <div class="card-title"><span>⚡ KP INDEX (3h)</span><span class="amber">5.3 moderate</span></div>
+        <canvas id="kpChart" class="small-canvas" width="400" height="82"></canvas>
+        <div style="display: flex; justify-content: space-between; font-size: 7px; margin-top: 5px; color:#5e86ab;"><span>18h</span><span>12h</span><span>6h</span><span>NOW</span></div>
       </div>
-      <canvas id="kpChart" class="chart"></canvas>
-    </div>
-
-    <div class="card">
-      <div class="card-title">
-        <span>Drag Risk Scale</span>
-      </div>
-
-      <div class="risk-scale">
-        <div class="risk-item">
-          <div class="bullet green" style="background: var(--accent-green);"></div>
-          <span>NOMINAL</span>
-          <span>&lt; 1.10x</span>
-        </div>
-
-        <div class="risk-item">
-          <div class="bullet orange" style="background: var(--accent-orange);"></div>
-          <span>MODERATE</span>
-          <span>1.10 - 1.30x</span>
-        </div>
-
-        <div class="risk-item">
-          <div class="bullet red" style="background: var(--accent-red);"></div>
-          <span>HIGH</span>
-          <span>&gt; 1.60x</span>
+      <div class="card">
+        <div class="card-title"><span>🛰️ PLANE DISTRIBUTION</span><span>inclination clusters</span></div>
+        <div id="orbitalGridComp" class="orb-grid"></div>
+        <div class="legend-inline">
+          <span><div class="dot dot-current" style="display: inline-block;"></div> Now</span>
+          <span><div class="dot dot-6h" style="display: inline-block;"></div> 6h</span>
+          <span><div class="dot dot-12h" style="display: inline-block;"></div> 12h</span>
+          <span><div class="dot dot-18h" style="display: inline-block;"></div> 18h</span>
         </div>
       </div>
     </div>
-  </section>
+    <div class="events-risk">
+      <div class="card">
+        <div class="card-title">📋 RECENT OPERATIONAL EVENTS</div>
+        <table class="event-table">
+          <thead><tr><th>TIME (UTC)</th><th>EVENT</th><th>SEVERITY</th><th>DETAILS</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family: monospace;">05:24:02</td><td>Kp threshold 5.0</td><td class="sev-m">MODERATE</td><td>Geomag surge → density rise</td></tr>
+            <tr><td style="font-family: monospace;">05:23:41</td><td>3 conjunction flags</td><td class="sev-m">WATCH</td><td>All clear, drag increased</td></tr>
+            <tr><td style="font-family: monospace;">05:22:58</td><td>Propagation batch</td><td style="color:#4ade80;">INFO</td><td>42 sats updated</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠️ DRAG RISK SCALE</div>
+        <div class="risk-bars">
+          <div class="risk-item"><div class="risk-bullet" style="background:#4ade80;"></div><span>NOMINAL</span><span style="margin-left:auto;">&lt;1.10x</span></div>
+          <div class="risk-item"><div class="risk-bullet" style="background:#facc15;"></div><span>MODERATE</span><span style="margin-left:auto;">1.10–1.30x</span></div>
+          <div class="risk-item"><div class="risk-bullet" style="background:#fb923c;"></div><span>ELEVATED</span><span style="margin-left:auto;">1.30–1.60x</span></div>
+          <div class="risk-item"><div class="risk-bullet" style="background:#ef4444;"></div><span>HIGH</span><span style="margin-left:auto;">&gt;1.60x</span></div>
+          <div class="risk-item" style="margin-top: 4px;"><span style="font-size:8px;">Current: 1.17x → moderate regime</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <div class="footer-note" id="dataSourceNote">Loading live pipeline data…</div>
-
-  <script>
-    const DATA_URL = "./outputs/live_leo_stress.csv";
-
-    const state = {
-      satCount: 42,
-      kpIndex: 5.3,
-      densityMultiplier: 1.17,
-      altitudeKm: 534,
-      velocityKmS: 7.61,
-      satelliteName: "STARLINK-2984",
-      densitySeries: [0.96, 0.94, 0.93, 0.91, 0.88, 0.92, 0.87, 0.91, 0.95, 0.90, 0.93, 1.01, 1.00, 1.08, 1.07, 1.18, 1.21, 1.19, 1.31, 1.23, 1.20],
-      kpSeries: [3.0, 3.8, 3.6, 4.9, 5.2, 6.3, 6.7, 6.3, 5.9, 5.8, 5.7, 4.8, 4.5, 3.9, 3.7, 3.1, 3.0, 4.2]
-    };
-
-    function parseCSV(text) {
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
-      if (lines.length < 2) return [];
-
-      const headers = lines[0].split(",").map(h => h.trim());
-
-      return lines.slice(1).map(line => {
-        const values = [];
-        let current = "";
-        let inQuotes = false;
-
-        for (const char of line) {
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === "," && !inQuotes) {
-            values.push(current.trim());
-            current = "";
-          } else {
-            current += char;
-          }
-        }
-
-        values.push(current.trim());
-
-        const row = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] ?? "";
-        });
-
-        return row;
+<script>
+  (function(){
+    // ----- EARTH CANVAS (no orbit lines, only satellite dots + Earth) -----
+    const canvas = document.getElementById('earthCanvas');
+    let ctx = canvas.getContext('2d');
+    let container = canvas.parentElement;
+    let width, height;
+    
+    function resizeEarthCanvas() {
+      const rect = container.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width;
+      canvas.height = height;
+      drawEarthAndDots();
+    }
+    
+    // 42 satellites with risk colors, no orbital rings
+    const satellites = [];
+    for (let i = 0; i < 42; i++) {
+      let risk = 'low';
+      if (i < 3) risk = 'high';
+      else if (i < 12) risk = 'mid';
+      satellites.push({
+        angle: Math.random() * Math.PI * 2,
+        speed: 0.0012 + Math.random() * 0.0025,
+        radiusMult: 1.2 + Math.random() * 0.9,
+        tilt: -1.4 + Math.random() * 2.8,
+        risk: risk
       });
     }
-
-    function firstAvailable(row, names, fallback = "") {
-      for (const name of names) {
-        if (row[name] !== undefined && row[name] !== null && row[name] !== "") {
-          return row[name];
-        }
-      }
-      return fallback;
-    }
-
-    function toNumber(value, fallback = 0) {
-      const n = Number(String(value).replace(/[^\d.-]/g, ""));
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function classifyRisk(densityMultiplier) {
-      if (densityMultiplier >= 1.6) {
-        return {
-          label: "HIGH",
-          system: "Elevated",
-          colour: "var(--accent-red)",
-          kpLabel: "Storm"
-        };
-      }
-
-      if (densityMultiplier >= 1.1) {
-        return {
-          label: "ELEVATED",
-          system: "Operational",
-          colour: "var(--accent-orange)",
-          kpLabel: "Moderate"
-        };
-      }
-
-      return {
-        label: "NOMINAL",
-        system: "Operational",
-        colour: "var(--accent-green)",
-        kpLabel: "Quiet"
-      };
-    }
-
-    async function loadLiveData() {
-      try {
-        const response = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
-
-        if (!response.ok) {
-          throw new Error(`Could not fetch ${DATA_URL}`);
-        }
-
-        const text = await response.text();
-        const rows = parseCSV(text);
-
-        if (!rows.length) {
-          throw new Error("CSV has no rows");
-        }
-
-        const latest = rows[rows.length - 1];
-
-        const satelliteName = firstAvailable(
-          latest,
-          ["satellite_name", "name", "satellite", "object_name", "norad_name"],
-          state.satelliteName
-        );
-
-        const altitudeKm = toNumber(
-          firstAvailable(latest, ["altitude_km", "altitude", "height_km"], state.altitudeKm),
-          state.altitudeKm
-        );
-
-        const velocityKmS = toNumber(
-          firstAvailable(latest, ["velocity_km_s", "velocity", "speed_km_s"], state.velocityKmS),
-          state.velocityKmS
-        );
-
-        const kpIndex = toNumber(
-          firstAvailable(latest, ["kp_index", "kp", "kp_value"], state.kpIndex),
-          state.kpIndex
-        );
-
-        const densityMultiplier = toNumber(
-          firstAvailable(
-            latest,
-            ["density_multiplier", "atm_density_multiplier", "density_x_baseline", "density_ratio", "stress_multiplier"],
-            state.densityMultiplier
-          ),
-          state.densityMultiplier
-        );
-
-        const satCount = rows.length || state.satCount;
-
-        state.satelliteName = satelliteName.toUpperCase();
-        state.altitudeKm = altitudeKm;
-        state.velocityKmS = velocityKmS;
-        state.kpIndex = kpIndex;
-        state.densityMultiplier = densityMultiplier;
-        state.satCount = satCount;
-
-        state.densitySeries = rows
-          .slice(-24)
-          .map(row => toNumber(
-            firstAvailable(row, ["density_multiplier", "atm_density_multiplier", "density_x_baseline", "density_ratio", "stress_multiplier"], densityMultiplier),
-            densityMultiplier
-          ));
-
-        state.kpSeries = rows
-          .slice(-18)
-          .map(row => toNumber(
-            firstAvailable(row, ["kp_index", "kp", "kp_value"], kpIndex),
-            kpIndex
-          ));
-
-        updateDashboard();
-        document.getElementById("dataSourceNote").textContent = `Live data loaded from ${DATA_URL}`;
-
-      } catch (error) {
-        console.warn(error);
-        updateDashboard();
-        document.getElementById("dataSourceNote").textContent = "Using fallback demo values. Check outputs/live_leo_stress.csv exists.";
-      }
-    }
-
-    function updateDashboard() {
-      const risk = classifyRisk(state.densityMultiplier);
-
-      document.getElementById("systemStatus").textContent = risk.system;
-      document.getElementById("riskDot").style.background = risk.colour;
-      document.getElementById("riskDot").style.boxShadow = `0 0 18px ${risk.colour}`;
-
-      document.getElementById("satCount").textContent = state.satCount;
-      document.getElementById("kpValue").textContent = state.kpIndex.toFixed(1);
-      document.getElementById("kpCardValue").textContent = state.kpIndex.toFixed(1);
-      document.getElementById("kpLabel").textContent = state.kpIndex >= 5 ? "Moderate" : "Quiet";
-
-      document.getElementById("satName").textContent = state.satelliteName;
-      document.getElementById("altitudeValue").textContent = `${state.altitudeKm.toFixed(0)} km`;
-      document.getElementById("velocityValue").textContent = `${state.velocityKmS.toFixed(2)} km/s`;
-
-      const dragRisk = document.getElementById("dragRiskValue");
-      dragRisk.textContent = risk.label;
-      dragRisk.style.color = risk.colour;
-
-      document.getElementById("densityValue").textContent = `${state.densityMultiplier.toFixed(2)}x baseline`;
-      document.getElementById("densityCardValue").textContent = `${state.densityMultiplier.toFixed(2)}x`;
-
-      drawLineChart("densityChart", state.densitySeries, {
-        colour: "#ff8f1f",
-        min: 0.8,
-        max: Math.max(1.4, Math.max(...state.densitySeries) + 0.1),
-        labelsY: ["1.40x", "1.20x", "1.00x", "0.80x"],
-        labelsX: ["-24h", "-18h", "-12h", "-6h", "0h"]
-      });
-
-      drawLineChart("kpChart", state.kpSeries, {
-        colour: "#ff8f1f",
-        min: 0,
-        max: 9,
-        labelsY: ["9", "6", "3", "0"],
-        labelsX: ["-3h", "-2h", "-1h", "0h"]
-      });
-    }
-
-    function updateClock() {
-      document.getElementById("clock").textContent = new Date().toISOString().slice(11, 19);
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    const canvas = document.getElementById("earthCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let w;
-    let h;
-    let earthImageReady = false;
-    let earthTexture = new Image();
-
-    function resize() {
-      w = canvas.width = window.innerWidth * devicePixelRatio;
-      h = canvas.height = window.innerHeight * devicePixelRatio;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    }
-
-    window.addEventListener("resize", resize);
-    resize();
-
-    const stars = Array.from({ length: 260 }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      r: Math.random() * 1.4 + 0.2,
-      a: Math.random() * 0.7 + 0.15
-    }));
-
-    const satellites = Array.from({ length: 82 }, (_, i) => ({
-      angle: Math.random() * Math.PI * 2,
-      speed: 0.0012 + Math.random() * 0.0032,
-      tilt: (Math.random() - 0.5) * Math.PI * 1.15,
-      dist: 1.25 + Math.random() * 0.7,
-      alert: i % 13 === 0
-    }));
-
-    function drawEarthScene() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
+    
+    let animFrame = 0;
+    function drawEarthAndDots() {
+      if (!ctx || width === 0 || height === 0) return;
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = "#05070a";
-      ctx.fillRect(0, 0, width, height);
-
-      for (const star of stars) {
-        ctx.fillStyle = `rgba(255,255,255,${star.a})`;
-        ctx.beginPath();
-        ctx.arc(star.x * width, star.y * height, star.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      const cx = width * 0.34;
-      const cy = height * 0.49;
-
-      const availableHeight = height - 170 - 260;
-      const r = Math.min(width * 0.18, availableHeight * 0.55);
-
-      ctx.save();
-      ctx.translate(cx, cy);
-
-      for (let i = 0; i < 13; i++) {
-        ctx.save();
-        ctx.rotate((i / 13) * Math.PI * 2);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, r * (1.48 + Math.random() * 0.02), r * (0.36 + (i % 4) * 0.025), 0, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(96, 165, 250, ${0.16 + i * 0.005})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      ctx.restore();
-
-      const glow = ctx.createRadialGradient(cx, cy, r * 0.75, cx, cy, r * 1.35);
-      glow.addColorStop(0, "rgba(56, 189, 248, 0.0)");
-      glow.addColorStop(0.55, "rgba(56, 189, 248, 0.08)");
-      glow.addColorStop(1, "rgba(56, 189, 248, 0)");
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.45, 0, Math.PI * 2);
-      ctx.fill();
-
-      const earthGradient = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.1, cx, cy, r);
-      earthGradient.addColorStop(0, "#315c95");
-      earthGradient.addColorStop(0.4, "#102d54");
-      earthGradient.addColorStop(1, "#020617");
-
-      ctx.fillStyle = earthGradient;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      drawContinents(cx, cy, r);
-      drawCityLights(cx, cy, r);
-
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.75)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.22)";
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
-      ctx.stroke();
-
-      satellites.forEach((sat) => {
-        sat.angle += sat.speed;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(sat.tilt);
-
-        const x = Math.cos(sat.angle) * r * sat.dist;
-        const y = Math.sin(sat.angle) * r * 0.43 * sat.dist;
-        const colour = sat.alert ? "#ff3b3b" : "#e0f2fe";
-
-        ctx.fillStyle = colour;
-        ctx.shadowColor = colour;
-        ctx.shadowBlur = sat.alert ? 14 : 8;
-        ctx.beginPath();
-        ctx.arc(x, y, sat.alert ? 2.3 : 1.8, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-      });
-
-      requestAnimationFrame(drawEarthScene);
-    }
-
-    function drawContinents(cx, cy, r) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.985, 0, Math.PI * 2);
-      ctx.clip();
-
-      ctx.fillStyle = "rgba(30, 64, 115, 0.72)";
-      ctx.strokeStyle = "rgba(147, 197, 253, 0.18)";
-      ctx.lineWidth = 1;
-
-      const land = [
-        [[-0.62, -0.48], [-0.35, -0.62], [-0.06, -0.49], [0.02, -0.22], [-0.18, -0.05], [-0.43, -0.12], [-0.58, -0.28]],
-        [[-0.16, -0.05], [0.05, 0.1], [0.02, 0.42], [-0.08, 0.68], [-0.22, 0.34], [-0.28, 0.1]],
-        [[0.12, -0.52], [0.48, -0.45], [0.66, -0.2], [0.48, -0.02], [0.2, -0.14], [0.04, -0.32]],
-        [[0.18, 0.0], [0.48, 0.12], [0.42, 0.44], [0.18, 0.46], [0.04, 0.2]]
-      ];
-
-      for (const shape of land) {
-        ctx.beginPath();
-        shape.forEach(([x, y], index) => {
-          const px = cx + x * r;
-          const py = cy + y * r;
-          if (index === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        });
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    function drawCityLights(cx, cy, r) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.985, 0, Math.PI * 2);
-      ctx.clip();
-
-      for (let i = 0; i < 260; i++) {
-        const cluster = i < 130 ? [-0.37, -0.26] : i < 200 ? [0.26, -0.18] : [-0.08, 0.28];
-        const x = cluster[0] + (Math.random() - 0.5) * 0.35;
-        const y = cluster[1] + (Math.random() - 0.5) * 0.25;
-
-        if (x * x + y * y < 0.85) {
-          ctx.fillStyle = `rgba(255, 220, 150, ${0.26 + Math.random() * 0.45})`;
-          ctx.beginPath();
-          ctx.arc(cx + x * r, cy + y * r, Math.random() * 1.4, 0, Math.PI * 2);
-          ctx.fill();
+      
+      // stars background (relative to canvas)
+      for (let i = 0; i < 280; i++) {
+        if (!window.starCache) {
+          window.starCache = Array.from({ length: 380 }, () => ({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 1.5 + 0.3, alpha: 0.3 + Math.random() * 0.7 }));
         }
+        let s = window.starCache[i % window.starCache.length];
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 245, 210, ${s.alpha * 0.5})`;
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
       }
-
-      ctx.restore();
+      
+      // Earth center (slightly left-biased but visible)
+      const centerX = width * 0.5;
+      const centerY = height * 0.52;
+      const earthRadius = Math.min(width * 0.32, height * 0.36, 210);
+      
+      // draw satellite dots only (no orbit paths)
+      for (let sat of satellites) {
+        sat.angle += sat.speed;
+        const rx = sat.radiusMult * earthRadius;
+        const ry = rx * 0.38;
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(sat.tilt);
+        const xDot = Math.cos(sat.angle) * rx;
+        const yDot = Math.sin(sat.angle) * ry;
+        let dotColor = '#b7dcff';
+        if (sat.risk === 'high') dotColor = '#ff7a74';
+        else if (sat.risk === 'mid') dotColor = '#ffb45a';
+        ctx.shadowBlur = sat.risk === 'high' ? 6 : 2;
+        ctx.shadowColor = dotColor;
+        ctx.fillStyle = dotColor;
+        ctx.beginPath();
+        ctx.arc(xDot, yDot, sat.risk === 'high' ? 3.2 : 2.2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.shadowBlur = 0;
+      
+      // draw Earth with glow and abstract continents
+      const grad = ctx.createRadialGradient(centerX - 8, centerY - 6, 5, centerX, centerY, earthRadius);
+      grad.addColorStop(0, '#0c3c64');
+      grad.addColorStop(0.65, '#1b6596');
+      grad.addColorStop(1, '#02121f');
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, earthRadius, 0, Math.PI*2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+      
+      // soft landmass suggestion
+      ctx.globalAlpha = 0.28;
+      ctx.fillStyle = '#b9e0a6';
+      for (let i=0;i<16;i++) {
+        ctx.beginPath();
+        let offX = Math.sin(animFrame * 0.002 + i*1.2) * earthRadius * 0.45;
+        let offY = Math.cos(animFrame * 0.0018 + i*0.8) * earthRadius * 0.38;
+        ctx.ellipse(centerX + offX, centerY + offY, earthRadius*0.09, earthRadius*0.07, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = '#f5e6b0';
+      for (let i=0;i<34;i++) {
+        ctx.beginPath();
+        ctx.arc(centerX + (Math.sin(i*5.2 + animFrame*0.003) * earthRadius*0.41), centerY + (Math.cos(i*3.7) * earthRadius*0.35), 1.4, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, earthRadius + 6, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(90, 170, 240, 0.12)';
+      ctx.fill();
+      ctx.globalAlpha = 1;
     }
-
-    function drawLineChart(id, values, options) {
-      const canvas = document.getElementById(id);
-      const c = canvas.getContext("2d");
-      const ratio = window.devicePixelRatio || 1;
-
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-
-      canvas.width = width * ratio;
-      canvas.height = height * ratio;
-
-      c.setTransform(ratio, 0, 0, ratio, 0, 0);
-      c.clearRect(0, 0, width, height);
-
-      const padding = {
-        top: 8,
-        right: 12,
-        bottom: 30,
-        left: 46
-      };
-
-      const chartW = width - padding.left - padding.right;
-      const chartH = height - padding.top - padding.bottom;
-
-      c.font = "13px ui-sans-serif, system-ui";
-      c.fillStyle = "rgba(181,186,199,0.85)";
-      c.strokeStyle = "rgba(255,255,255,0.18)";
-      c.lineWidth = 1;
-      c.setLineDash([3, 3]);
-
-      options.labelsY.forEach((label, index) => {
-        const y = padding.top + (chartH / (options.labelsY.length - 1)) * index;
-        c.beginPath();
-        c.moveTo(padding.left, y);
-        c.lineTo(width - padding.right, y);
-        c.stroke();
-
-        c.fillText(label, 0, y + 4);
+    
+    function animateEarth() {
+      animFrame += 18;
+      drawEarthAndDots();
+      requestAnimationFrame(animateEarth);
+    }
+    
+    const resizeObserver = new ResizeObserver(() => {
+      resizeEarthCanvas();
+    });
+    if (container) resizeObserver.observe(container);
+    resizeEarthCanvas();
+    animateEarth();
+    
+    // ----- UTC CLOCK -----
+    function updateUTCLive() {
+      const now = new Date();
+      const timeStr = now.toISOString().slice(11, 19);
+      const clockSpan = document.getElementById('utcLive');
+      if (clockSpan) clockSpan.innerText = timeStr;
+    }
+    setInterval(updateUTCLive, 1000);
+    updateUTCLive();
+    
+    // ----- DENSITY CHART (elegant line)-----
+    function drawDensityCurve() {
+      const canv = document.getElementById('densityChart');
+      if (!canv) return;
+      const w = canv.clientWidth, h = canv.clientHeight;
+      canv.width = w; canv.height = h;
+      const ctx2 = canv.getContext('2d');
+      const densityData = [0.82,0.79,0.85,0.90,0.87,0.93,0.96,1.00,1.03,0.99,1.02,1.05,1.08,1.12,1.09,1.13,1.16,1.12,1.18,1.21,1.24,1.20,1.27,1.30,1.34,1.37,1.32,1.39,1.43,1.47,1.50];
+      const maxV = 1.62;
+      const padL = 24, padR = 8, padT = 8, padB = 12;
+      const step = (w - padL - padR) / (densityData.length - 1);
+      ctx2.clearRect(0,0,w,h);
+      ctx2.beginPath();
+      for (let i=0;i<densityData.length;i++) {
+        let x = padL + i*step;
+        let y = h - padB - (densityData[i]/maxV)*(h - padT - padB);
+        if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
+      }
+      ctx2.lineTo(w-padR, h-padB);
+      ctx2.lineTo(padL, h-padB);
+      ctx2.fillStyle = 'rgba(60, 170, 255, 0.1)';
+      ctx2.fill();
+      ctx2.beginPath();
+      for (let i=0;i<densityData.length;i++) {
+        let x = padL + i*step;
+        let y = h - padB - (densityData[i]/maxV)*(h - padT - padB);
+        if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
+      }
+      ctx2.strokeStyle = '#5bb4ff';
+      ctx2.lineWidth = 1.8;
+      ctx2.stroke();
+      let lastX = padL + (densityData.length-1)*step;
+      let lastY = h - padB - (densityData[densityData.length-1]/maxV)*(h - padT - padB);
+      ctx2.fillStyle = '#ffb85c';
+      ctx2.beginPath();
+      ctx2.arc(lastX, lastY, 3, 0, Math.PI*2);
+      ctx2.fill();
+    }
+    
+    function drawKpBars() {
+      const canv = document.getElementById('kpChart');
+      if (!canv) return;
+      const w = canv.clientWidth, h = canv.clientHeight;
+      canv.width = w; canv.height = h;
+      const ctx2 = canv.getContext('2d');
+      const kpVals = [1.2,1.5,1.8,2.4,2.1,1.9,2.8,3.2,3.5,2.9,3.8,4.0,3.5,4.2,4.5,3.8,4.8,4.2,3.5,3.8,4.5,5.0,4.8,5.3];
+      const maxK = 9;
+      const padL = 24, padR = 8, padT = 8, padB = 12;
+      const barW = (w - padL - padR) / kpVals.length - 1.2;
+      ctx2.clearRect(0,0,w,h);
+      for (let i=0;i<kpVals.length;i++) {
+        let barH = (kpVals[i]/maxK)*(h - padT - padB);
+        let x = padL + i*(barW+1.2);
+        let y = h - padB - barH;
+        let r=80,g=190,b=255;
+        if(kpVals[i]>=5){ r=255; g=140; b=50; }
+        else if(kpVals[i]>=4){ r=255; g=185; b=65; }
+        ctx2.fillStyle = `rgb(${r},${g},${b})`;
+        ctx2.shadowBlur = 2;
+        ctx2.fillRect(x, y, barW, barH);
+      }
+      ctx2.shadowBlur = 0;
+    }
+    
+    // orbital plane distribution (aesthetic dot clusters)
+    function buildOrbitalGrid() {
+      const container = document.getElementById('orbitalGridComp');
+      if (!container) return;
+      const planes = [
+        { name:"53°", now:8, ago6:7, ago12:8, ago18:7 },
+        { name:"70°", now:14, ago6:13, ago12:12, ago18:12 },
+        { name:"97.6°", now:8, ago6:9, ago12:7, ago18:8 },
+        { name:"110°", now:8, ago6:7, ago12:8, ago18:6 },
+        { name:"130°", now:4, ago6:6, ago12:4, ago18:5 }
+      ];
+      container.innerHTML = '';
+      planes.forEach(p => {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'orb-col';
+        colDiv.innerHTML = `
+          <div class="inc-badge">${p.name}</div>
+          <div class="time-label-sm">NOW</div><div class="dot-cluster" id="nowc-${p.name.replace('°','')}"></div>
+          <div class="time-label-sm">6h ago</div><div class="dot-cluster" id="ag6c-${p.name.replace('°','')}"></div>
+          <div class="time-label-sm">12h ago</div><div class="dot-cluster" id="ag12c-${p.name.replace('°','')}"></div>
+          <div class="time-label-sm">18h ago</div><div class="dot-cluster" id="ag18c-${p.name.replace('°','')}"></div>
+        `;
+        container.appendChild(colDiv);
       });
-
-      c.setLineDash([]);
-
-      options.labelsX.forEach((label, index) => {
-        const x = padding.left + (chartW / (options.labelsX.length - 1)) * index;
-        c.fillText(label, x - 12, height - 8);
-      });
-
-      if (!values.length) return;
-
-      const min = options.min;
-      const max = options.max;
-
-      const point = (value, index) => {
-        const x = padding.left + (index / Math.max(1, values.length - 1)) * chartW;
-        const y = padding.top + (1 - ((value - min) / (max - min))) * chartH;
-        return [x, Math.max(padding.top, Math.min(padding.top + chartH, y))];
-      };
-
-      c.strokeStyle = options.colour;
-      c.lineWidth = 2.5;
-      c.shadowColor = options.colour;
-      c.shadowBlur = 8;
-      c.beginPath();
-
-      values.forEach((value, index) => {
-        const [x, y] = point(value, index);
-        if (index === 0) c.moveTo(x, y);
-        else c.lineTo(x, y);
-      });
-
-      c.stroke();
-      c.shadowBlur = 0;
-
-      c.fillStyle = options.colour;
-      values.forEach((value, index) => {
-        const [x, y] = point(value, index);
-        c.beginPath();
-        c.arc(x, y, 2.4, 0, Math.PI * 2);
-        c.fill();
+      planes.forEach(p => {
+        const safe = p.name.replace('°','');
+        const fillDots = (id, count, cls) => {
+          const el = document.getElementById(id);
+          if(!el) return;
+          el.innerHTML = '';
+          for(let i=0;i<count;i++){ let d=document.createElement('div'); d.className=`dot ${cls}`; el.appendChild(d); }
+        };
+        fillDots(`nowc-${safe}`, p.now, 'dot-current');
+        fillDots(`ag6c-${safe}`, p.ago6, 'dot-6h');
+        fillDots(`ag12c-${safe}`, p.ago12, 'dot-12h');
+        fillDots(`ag18c-${safe}`, p.ago18, 'dot-18h');
       });
     }
-
-    drawEarthScene();
-    loadLiveData();
-
-    setInterval(loadLiveData, 60_000);
-    window.addEventListener("resize", updateDashboard);
-  </script>
+    
+    function handleResizeAll() {
+      drawDensityCurve();
+      drawKpBars();
+      buildOrbitalGrid();
+    }
+    window.addEventListener('resize', () => { handleResizeAll(); });
+    setTimeout(() => { handleResizeAll(); }, 80);
+    drawDensityCurve();
+    drawKpBars();
+    buildOrbitalGrid();
+  })();
+</script>
 </body>
 </html>
