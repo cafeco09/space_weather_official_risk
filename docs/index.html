@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Space Weather Official Risk Pipeline</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <h1>Space Weather Official Risk Pipeline</h1>
+      <p>
+        A lightweight dashboard for modelling simplified LEO satellite drag stress
+        under changing atmospheric conditions.
+      </p>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <h2>Pipeline</h2>
+        <p>Loads satellite data, models atmospheric density, propagates orbits and scores stress risk.</p>
+      </div>
+
+      <div class="card">
+        <h2>Risk Levels</h2>
+        <p>Classifies satellites into low, medium and high drag-stress categories.</p>
+      </div>
+
+      <div class="card">
+        <h2>Parallel Processing</h2>
+        <p>Uses async orchestration with process-based parallel propagation across satellites.</p>
+      </div>
+    </section>
+
+    <section class="demo">
+      <h2>Demo Satellite Risk Output</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Satellite</th>
+            <th>Altitude</th>
+            <th>Stress Score</th>
+            <th>Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>STARLINK-1001</td>
+            <td>550 km</td>
+            <td>3.21</td>
+            <td><span class="low">Low</span></td>
+          </tr>
+          <tr>
+            <td>STARLINK-1002</td>
+            <td>545 km</td>
+            <td>4.62</td>
+            <td><span class="medium">Medium</span></td>
+          </tr>
+          <tr>
+            <td>STARLINK-1003</td>
+            <td>560 km</td>
+            <td>2.98</td>
+            <td><span class="low">Low</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>Built with Python, async processing and simplified orbital-risk modelling.</p>
+    </footer>
+  </main>
+</body>
+</html>
