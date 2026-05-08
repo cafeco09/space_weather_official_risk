@@ -1,75 +1,93 @@
+cat > docs/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Space Weather Official Risk Pipeline</title>
+  <title>Space Weather Risk Globe</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="container">
+  <main class="app">
     <section class="hero">
-      <h1>Space Weather Official Risk Pipeline</h1>
-      <p>
-        A lightweight dashboard for modelling simplified LEO satellite drag stress
-        under changing atmospheric conditions.
-      </p>
-    </section>
+      <div class="copy">
+        <p class="eyebrow">LEO Satellite Risk Intelligence</p>
+        <h1>Space Weather Official Risk Pipeline</h1>
+        <p class="subtitle">
+          A visual demo of satellite drag-stress risk under changing atmospheric conditions.
+        </p>
 
-    <section class="cards">
-      <div class="card">
-        <h2>Pipeline</h2>
-        <p>Loads satellite data, models atmospheric density, propagates orbits and scores stress risk.</p>
+        <div class="stats">
+          <div><strong>3</strong><span>tracked demo satellites</span></div>
+          <div><strong>90m</strong><span>propagation window</span></div>
+          <div><strong>Async</strong><span>parallel pipeline</span></div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Risk Levels</h2>
-        <p>Classifies satellites into low, medium and high drag-stress categories.</p>
-      </div>
+      <div class="space-scene">
+        <div class="stars"></div>
 
-      <div class="card">
-        <h2>Parallel Processing</h2>
-        <p>Uses async orchestration with process-based parallel propagation across satellites.</p>
+        <div class="orbit orbit-one">
+          <button class="satellite sat-one" data-name="STARLINK-1001" data-risk="Low" data-alt="550 km"></button>
+        </div>
+
+        <div class="orbit orbit-two">
+          <button class="satellite sat-two" data-name="STARLINK-1002" data-risk="Medium" data-alt="545 km"></button>
+        </div>
+
+        <div class="orbit orbit-three">
+          <button class="satellite sat-three" data-name="STARLINK-1003" data-risk="Low" data-alt="560 km"></button>
+        </div>
+
+        <div class="globe">
+          <div class="globe-shine"></div>
+          <div class="continents"></div>
+        </div>
+
+        <div class="tooltip" id="tooltip">
+          <strong id="tipName">Satellite</strong>
+          <span id="tipRisk">Risk</span>
+          <span id="tipAlt">Altitude</span>
+        </div>
       </div>
     </section>
 
-    <section class="demo">
-      <h2>Demo Satellite Risk Output</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Satellite</th>
-            <th>Altitude</th>
-            <th>Stress Score</th>
-            <th>Risk</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>STARLINK-1001</td>
-            <td>550 km</td>
-            <td>3.21</td>
-            <td><span class="low">Low</span></td>
-          </tr>
-          <tr>
-            <td>STARLINK-1002</td>
-            <td>545 km</td>
-            <td>4.62</td>
-            <td><span class="medium">Medium</span></td>
-          </tr>
-          <tr>
-            <td>STARLINK-1003</td>
-            <td>560 km</td>
-            <td>2.98</td>
-            <td><span class="low">Low</span></td>
-          </tr>
-        </tbody>
-      </table>
+    <section class="panel">
+      <h2>Pipeline flow</h2>
+      <div class="flow">
+        <div>Ingest catalogue</div>
+        <div>Atmosphere proxy</div>
+        <div>Parallel propagation</div>
+        <div>Risk scoring</div>
+      </div>
     </section>
-
-    <footer>
-      <p>Built with Python, async processing and simplified orbital-risk modelling.</p>
-    </footer>
   </main>
+
+  <script>
+    const tooltip = document.getElementById("tooltip");
+    const tipName = document.getElementById("tipName");
+    const tipRisk = document.getElementById("tipRisk");
+    const tipAlt = document.getElementById("tipAlt");
+
+    document.querySelectorAll(".satellite").forEach((sat) => {
+      sat.addEventListener("mouseenter", () => {
+        tipName.textContent = sat.dataset.name;
+        tipRisk.textContent = "Risk: " + sat.dataset.risk;
+        tipAlt.textContent = "Altitude: " + sat.dataset.alt;
+        tooltip.classList.add("show");
+      });
+
+      sat.addEventListener("mousemove", (event) => {
+        const scene = document.querySelector(".space-scene").getBoundingClientRect();
+        tooltip.style.left = event.clientX - scene.left + 18 + "px";
+        tooltip.style.top = event.clientY - scene.top - 18 + "px";
+      });
+
+      sat.addEventListener("mouseleave", () => {
+        tooltip.classList.remove("show");
+      });
+    });
+  </script>
 </body>
 </html>
+EOF
