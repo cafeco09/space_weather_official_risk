@@ -1,10 +1,10 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>STARLINK COMMAND • LEO Field Monitor</title>
+
   <style>
     * {
       margin: 0;
@@ -12,732 +12,1315 @@
       box-sizing: border-box;
     }
 
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
     body {
       background: #03070f;
       font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
-      height: 100vh;
+      height: 100dvh;
       width: 100vw;
       overflow: hidden;
       color: #edf4fc;
     }
 
-    /* main layout – no scroll, widescreen */
     .dashboard {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      height: 100dvh;
       width: 100%;
-      background: radial-gradient(circle at 20% 30%, #071221, #01060c);
       overflow: hidden;
+      background: radial-gradient(circle at 20% 30%, #071221, #01060c);
+
+      display: grid;
+      grid-template-rows:
+        auto
+        minmax(0, 1fr)
+        clamp(220px, 28vh, 285px);
     }
 
-    /* top bar – compact, clear */
+    /* TOP BAR */
     .top-bar {
-      flex-shrink: 0;
       display: flex;
       flex-wrap: nowrap;
       justify-content: space-between;
       gap: 8px;
-      padding: 8px 24px;
-      background: rgba(2, 9, 18, 0.8);
+      padding: 8px 18px;
+      min-height: 52px;
+      background: rgba(2, 9, 18, 0.84);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(70, 140, 210, 0.35);
-      z-index: 12;
+      z-index: 20;
       overflow-x: auto;
       scrollbar-width: none;
     }
+
+    .top-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .stat {
-      background: rgba(8, 26, 46, 0.6);
-      border-radius: 48px;
-      padding: 4px 20px;
+      background: rgba(8, 26, 46, 0.62);
+      border-radius: 999px;
+      padding: 4px 16px;
       display: inline-flex;
       align-items: baseline;
-      gap: 8px;
+      gap: 7px;
       white-space: nowrap;
       border: 1px solid rgba(100, 170, 235, 0.35);
     }
+
     .stat-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 1px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.9px;
       color: #98bbdf;
     }
+
     .stat-value {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
     }
+
     .green { color: #4ade80; }
     .amber { color: #fbbf24; }
 
-    /* MIDDLE: earth gets majority of vertical space */
+    /* MAIN EARTH + RIGHT PANEL */
     .middle {
-      flex: 1.4;
       min-height: 0;
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 20px;
-      padding: 12px 24px 8px 24px;
+      grid-template-columns: minmax(0, 1fr) minmax(310px, 345px);
+      gap: 14px;
+      padding: 12px 18px 10px;
       overflow: hidden;
     }
 
-    /* earth container – large, prominent */
     .earth-container {
-      background: #02070f;
-      border-radius: 36px;
-      border: 1px solid rgba(70, 140, 210, 0.5);
-      box-shadow: 0 20px 38px -12px black;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      width: 100%;
+
+      background: radial-gradient(circle at 50% 50%, #03111e, #01050b 70%);
+      border-radius: 30px;
+      border: 1px solid rgba(70, 140, 210, 0.52);
+      box-shadow: 0 20px 38px -14px #000;
       overflow: hidden;
+
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: stretch;
+      justify-content: stretch;
     }
+
     #earthCanvas {
       width: 100%;
       height: 100%;
       display: block;
-      border-radius: 34px;
+      border-radius: 28px;
     }
 
-    /* right panel: search + dropdown + details */
     .right-panel {
-      background: rgba(2, 12, 24, 0.88);
+      min-height: 0;
+      height: 100%;
+      width: 100%;
+
+      background: rgba(2, 12, 24, 0.9);
       backdrop-filter: blur(20px);
-      border-radius: 32px;
+      border-radius: 30px;
       border: 1px solid rgba(80, 150, 225, 0.45);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      overflow-y: auto;
-      scrollbar-width: thin;
+
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+      overflow: hidden;
     }
+
     .search-row {
-      background: rgba(0, 20, 35, 0.7);
-      border-radius: 60px;
-      padding: 4px 12px;
-      display: flex;
+      height: 40px;
+      background: rgba(0, 20, 35, 0.72);
+      border-radius: 999px;
+      padding: 4px 6px 4px 14px;
+
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: 8px;
+
       border: 1px solid rgba(100, 170, 240, 0.5);
     }
+
     .search-row input {
+      min-width: 0;
       background: transparent;
       border: none;
       color: white;
-      font-size: 13px;
+      font-size: 12px;
       width: 100%;
       outline: none;
       font-family: monospace;
     }
+
+    .search-row input::placeholder {
+      color: rgba(210, 230, 255, 0.58);
+    }
+
     .search-row button {
+      height: 30px;
+      min-width: 48px;
       background: #1f5582;
       border: none;
       color: white;
-      border-radius: 40px;
-      padding: 4px 14px;
+      border-radius: 999px;
+      padding: 0 13px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: 0.1s;
     }
+
     .search-row button:hover {
       background: #2d70a3;
     }
+
     #satSelect {
+      height: 38px;
+      width: 100%;
+      min-width: 0;
+
       background: rgba(10, 30, 50, 0.95);
       border: 1px solid #2f6b99;
-      border-radius: 40px;
+      border-radius: 999px;
       color: white;
-      padding: 8px 12px;
+      padding: 0 12px;
       font-size: 12px;
       font-family: monospace;
       cursor: pointer;
-      width: 100%;
+      outline: none;
     }
+
+    #satDetails {
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+
     .sat-info {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
+
     .sat-title {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
+      gap: 10px;
       border-bottom: 1px solid rgba(100, 180, 240, 0.3);
-      padding-bottom: 6px;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
     }
+
     .sat-title h3 {
-      font-size: 20px;
-      font-weight: 800;
+      min-width: 0;
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: -0.3px;
       background: linear-gradient(125deg, #fff, #b0d4ff);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
+
     .track-badge {
-      background: rgba(74, 222, 128, 0.2);
+      flex-shrink: 0;
+      background: rgba(74, 222, 128, 0.18);
       border: 1px solid #4ade80;
-      border-radius: 40px;
-      padding: 2px 12px;
+      border-radius: 999px;
+      padding: 3px 10px;
       font-size: 9px;
-      font-weight: 700;
+      font-weight: 800;
       color: #4ade80;
     }
+
     .info-row {
       display: flex;
       justify-content: space-between;
+      gap: 12px;
       font-size: 12px;
-      padding: 6px 0;
+      padding: 5px 0;
       border-bottom: 1px solid rgba(70, 130, 200, 0.2);
     }
+
     .info-label {
       color: #9bbde3;
     }
+
     .info-value {
-      font-weight: 500;
+      font-weight: 600;
       font-family: monospace;
-    }
-    .warning-value {
-      color: #fbbf24;
-      font-weight: 700;
+      text-align: right;
     }
 
-    /* BOTTOM SECTION – charts fill space, no gaps */
+    .warning-value {
+      color: #fbbf24;
+      font-weight: 800;
+    }
+
+    /* BOTTOM SECTION */
     .bottom {
-      flex-shrink: 0;
-      padding: 0 24px 18px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .charts-row {
+      min-height: 0;
+      height: 100%;
+      padding: 0 18px 14px;
       display: grid;
-      grid-template-columns: 1fr 1fr 1.3fr;
-      gap: 20px;
+      grid-template-rows: minmax(100px, 1fr) minmax(88px, 0.82fr);
+      gap: 12px;
+      overflow: hidden;
     }
+
+    .charts-row {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.25fr;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .events-risk {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      overflow: hidden;
+    }
+
     .card {
-      background: rgba(4, 16, 28, 0.82);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+
+      background: rgba(4, 16, 28, 0.84);
       backdrop-filter: blur(18px);
-      border-radius: 26px;
+      border-radius: 22px;
       border: 1px solid rgba(70, 140, 210, 0.4);
-      padding: 12px 16px;
+      padding: 10px 13px;
     }
+
     .card-header {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      align-items: center;
+      gap: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.9px;
       text-transform: uppercase;
       color: #96bade;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
     canvas.chart {
       width: 100%;
-      height: 80px;
+      height: clamp(52px, 7.6vh, 76px);
       display: block;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: 14px;
     }
+
     .axis-labels {
       display: flex;
       justify-content: space-between;
       font-size: 7px;
-      margin-top: 6px;
+      margin-top: 5px;
       color: #6b92b9;
     }
+
     .orb-grid {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       justify-content: space-between;
-      margin: 10px 0 6px;
+      margin: 7px 0 4px;
+      min-height: 0;
     }
+
     .orb-col {
       flex: 1;
+      min-width: 0;
       text-align: center;
       background: rgba(10, 32, 52, 0.55);
-      border-radius: 20px;
-      padding: 8px 3px;
+      border-radius: 16px;
+      padding: 6px 3px;
     }
+
     .inc-badge {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
       background: #0f304a;
       display: inline-block;
-      padding: 2px 10px;
-      border-radius: 30px;
+      padding: 2px 8px;
+      border-radius: 999px;
       color: #daf0ff;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
+
     .time-label {
-      font-size: 7px;
-      font-weight: 600;
+      font-size: 6.5px;
+      font-weight: 700;
       color: #7a9fc9;
-      margin: 5px 0 2px;
+      margin: 4px 0 2px;
     }
+
     .dot-cluster {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 3px;
-      margin: 3px 0;
+      gap: 2px;
+      margin: 2px 0;
     }
+
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
     }
-    .dot-current { background: #ffbc5e; box-shadow: 0 0 3px #ffbc5e; }
+
+    .dot-current {
+      background: #ffbc5e;
+      box-shadow: 0 0 3px #ffbc5e;
+    }
+
     .dot-6h { background: #5b99cc; }
     .dot-12h { background: #3f77a3; }
     .dot-18h { background: #2a5a80; }
+
     .legend {
       display: flex;
       justify-content: center;
-      gap: 14px;
-      margin-top: 6px;
+      gap: 12px;
+      margin-top: 4px;
       font-size: 7px;
+      color: #9bbde3;
     }
-    .events-risk {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-    }
+
     .event-table {
       width: 100%;
-      font-size: 9px;
+      font-size: 8.5px;
       border-collapse: collapse;
     }
+
     .event-table th {
       text-align: left;
       color: #8bb3db;
-      font-weight: 600;
-      padding-bottom: 5px;
+      font-weight: 700;
+      padding-bottom: 4px;
     }
+
     .event-table td {
-      padding: 5px 2px 4px 0;
-      border-top: 1px solid rgba(80,140,210,0.2);
+      padding: 4px 2px 4px 0;
+      border-top: 1px solid rgba(80, 140, 210, 0.2);
+      vertical-align: top;
     }
+
     .risk-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 6px;
     }
+
     .risk-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 10px;
+      gap: 8px;
+      font-size: 9px;
     }
+
     .risk-bullet {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #2f6d98; border-radius: 10px; }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2f6d98;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 980px) {
+      .dashboard {
+        grid-template-rows: auto minmax(0, 1fr) clamp(210px, 30vh, 260px);
+      }
+
+      .middle {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        padding: 10px 12px 8px;
+        gap: 10px;
+      }
+
+      .bottom {
+        padding: 0 12px 12px;
+        gap: 10px;
+      }
+
+      .charts-row,
+      .events-risk {
+        gap: 10px;
+      }
+
+      .stat {
+        padding: 4px 12px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
+
 <body>
-<div class="dashboard">
-  <div class="top-bar">
-    <div class="stat"><span class="stat-label">🛸 SYS</span><span class="stat-value green">STARLINK·LEO</span></div>
-    <div class="stat"><span class="stat-label">SATELLITES</span><span class="stat-value">42</span><span class="stat-label" style="margin-left:3px;">tracked</span></div>
-    <div class="stat"><span class="stat-label">ALTITUDE</span><span class="stat-value">548</span><span class="stat-label">km avg</span></div>
-    <div class="stat"><span class="stat-label">KP INDEX</span><span class="stat-value amber">5.3</span><span class="stat-label">G2</span></div>
-    <div class="stat"><span class="stat-label">DRAG</span><span class="stat-value amber">MODERATE</span><span class="stat-label">↑1.17x</span></div>
-    <div class="stat"><span class="stat-label">⚠️ RISK</span><span class="stat-value amber">3</span><span class="stat-label">high</span></div>
-    <div class="stat"><span class="stat-label">UTC</span><span class="stat-value" style="font-size:16px; font-family: monospace;" id="utcClock">--:--:--</span></div>
-  </div>
+  <div class="dashboard">
+    <div class="top-bar">
+      <div class="stat">
+        <span class="stat-label">SYS</span>
+        <span class="stat-value green">STARLINK·LEO</span>
+      </div>
 
-  <div class="middle">
-    <div class="earth-container">
-      <canvas id="earthCanvas" width="1200" height="650" style="width:100%; height:100%; object-fit: cover;"></canvas>
-    </div>
-    <div class="right-panel">
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder="🔍 Search Starlink... e.g., 2984" autocomplete="off">
-        <button id="searchBtn">Go</button>
+      <div class="stat">
+        <span class="stat-label">SATELLITES</span>
+        <span class="stat-value">42</span>
+        <span class="stat-label" style="margin-left:3px;">tracked</span>
       </div>
-      <select id="satSelect" size="1">
-        <option value="">-- Choose a satellite --</option>
-      </select>
-      <div id="satDetails"></div>
-    </div>
-  </div>
 
-  <div class="bottom">
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-header"><span>🌊 ATMOSPHERIC DENSITY</span><span class="amber">+17%</span></div>
-        <canvas id="densityCanvas" class="chart" width="500" height="80"></canvas>
-        <div class="axis-labels"><span>T-72h</span><span>T-48h</span><span>T-24h</span><span>NOW</span></div>
+      <div class="stat">
+        <span class="stat-label">ALTITUDE</span>
+        <span class="stat-value">548</span>
+        <span class="stat-label">km avg</span>
       </div>
-      <div class="card">
-        <div class="card-header"><span>⚡ KP INDEX (3h)</span><span class="amber">5.3 moderate</span></div>
-        <canvas id="kpCanvas" class="chart" width="500" height="80"></canvas>
-        <div class="axis-labels"><span>18h</span><span>12h</span><span>6h</span><span>NOW</span></div>
+
+      <div class="stat">
+        <span class="stat-label">KP INDEX</span>
+        <span class="stat-value amber">5.3</span>
+        <span class="stat-label">G2</span>
       </div>
-      <div class="card">
-        <div class="card-header"><span>🛰️ PLANE DISTRIBUTION</span><span>inclination clusters</span></div>
-        <div id="orbitalGrid" class="orb-grid"></div>
-        <div class="legend"><span><div class="dot dot-current" style="display:inline-block;"></div> Now</span><span><div class="dot dot-6h" style="display:inline-block;"></div> 6h</span><span><div class="dot dot-12h" style="display:inline-block;"></div> 12h</span><span><div class="dot dot-18h" style="display:inline-block;"></div> 18h</span></div>
+
+      <div class="stat">
+        <span class="stat-label">DRAG</span>
+        <span class="stat-value amber">MODERATE</span>
+        <span class="stat-label">↑1.17x</span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">RISK</span>
+        <span class="stat-value amber">3</span>
+        <span class="stat-label">high</span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">UTC</span>
+        <span class="stat-value" style="font-size:16px; font-family: monospace;" id="utcClock">--:--:--</span>
       </div>
     </div>
-    <div class="events-risk">
-      <div class="card">
-        <div class="card-header">📋 RECENT OPERATIONAL EVENTS</div>
-        <table class="event-table">
-          <thead><tr><th>TIME (UTC)</th><th>EVENT</th><th>SEVERITY</th><th>DETAILS</th></tr></thead>
-          <tbody>
-            <tr><td style="font-family: monospace;">05:24:02</td><td>Kp threshold 5.0</td><td class="amber">MODERATE</td><td>Geomag surge → density rise</td></tr>
-            <tr><td style="font-family: monospace;">05:23:41</td><td>3 conjunction flags</td><td class="amber">WATCH</td><td>All clear, drag increased</td></tr>
-            <tr><td style="font-family: monospace;">05:22:58</td><td>Propagation batch</td><td style="color:#4ade80;">INFO</td><td>42 sats updated</td></tr>
-          </tbody>
-        </table>
+
+    <div class="middle">
+      <div class="earth-container">
+        <canvas id="earthCanvas" width="1200" height="650"></canvas>
       </div>
-      <div class="card">
-        <div class="card-header">⚠️ DRAG RISK SCALE</div>
-        <div class="risk-list">
-          <div class="risk-item"><div class="risk-bullet" style="background:#4ade80;"></div><span>NOMINAL</span><span style="margin-left:auto;">&lt;1.10x</span></div>
-          <div class="risk-item"><div class="risk-bullet" style="background:#facc15;"></div><span>MODERATE</span><span style="margin-left:auto;">1.10–1.30x</span></div>
-          <div class="risk-item"><div class="risk-bullet" style="background:#fb923c;"></div><span>ELEVATED</span><span style="margin-left:auto;">1.30–1.60x</span></div>
-          <div class="risk-item"><div class="risk-bullet" style="background:#ef4444;"></div><span>HIGH</span><span style="margin-left:auto;">&gt;1.60x</span></div>
-          <div class="risk-item" style="margin-top:6px;"><span style="font-size:9px;">Current: 1.17x → moderate regime</span></div>
+
+      <div class="right-panel">
+        <div class="search-row">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search Starlink... e.g., 2984"
+            autocomplete="off"
+          />
+          <button id="searchBtn">Go</button>
+        </div>
+
+        <select id="satSelect" size="1">
+          <option value="">-- Choose a satellite --</option>
+        </select>
+
+        <div id="satDetails"></div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <span>ATMOSPHERIC DENSITY</span>
+            <span class="amber">+17%</span>
+          </div>
+          <canvas id="densityCanvas" class="chart" width="500" height="80"></canvas>
+          <div class="axis-labels">
+            <span>T-72h</span>
+            <span>T-48h</span>
+            <span>T-24h</span>
+            <span>NOW</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>KP INDEX 3h</span>
+            <span class="amber">5.3 moderate</span>
+          </div>
+          <canvas id="kpCanvas" class="chart" width="500" height="80"></canvas>
+          <div class="axis-labels">
+            <span>18h</span>
+            <span>12h</span>
+            <span>6h</span>
+            <span>NOW</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>PLANE DISTRIBUTION</span>
+            <span>inclination clusters</span>
+          </div>
+          <div id="orbitalGrid" class="orb-grid"></div>
+          <div class="legend">
+            <span><div class="dot dot-current" style="display:inline-block;"></div> Now</span>
+            <span><div class="dot dot-6h" style="display:inline-block;"></div> 6h</span>
+            <span><div class="dot dot-12h" style="display:inline-block;"></div> 12h</span>
+            <span><div class="dot dot-18h" style="display:inline-block;"></div> 18h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="events-risk">
+        <div class="card">
+          <div class="card-header">RECENT OPERATIONAL EVENTS</div>
+          <table class="event-table">
+            <thead>
+              <tr>
+                <th>TIME UTC</th>
+                <th>EVENT</th>
+                <th>SEVERITY</th>
+                <th>DETAILS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family: monospace;">05:24:02</td>
+                <td>Kp threshold 5.0</td>
+                <td class="amber">MODERATE</td>
+                <td>Geomag surge → density rise</td>
+              </tr>
+              <tr>
+                <td style="font-family: monospace;">05:23:41</td>
+                <td>3 conjunction flags</td>
+                <td class="amber">WATCH</td>
+                <td>All clear, drag increased</td>
+              </tr>
+              <tr>
+                <td style="font-family: monospace;">05:22:58</td>
+                <td>Propagation batch</td>
+                <td style="color:#4ade80;">INFO</td>
+                <td>42 sats updated</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">DRAG RISK SCALE</div>
+          <div class="risk-list">
+            <div class="risk-item">
+              <div class="risk-bullet" style="background:#4ade80;"></div>
+              <span>NOMINAL</span>
+              <span style="margin-left:auto;">&lt;1.10x</span>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-bullet" style="background:#facc15;"></div>
+              <span>MODERATE</span>
+              <span style="margin-left:auto;">1.10–1.30x</span>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-bullet" style="background:#fb923c;"></div>
+              <span>ELEVATED</span>
+              <span style="margin-left:auto;">1.30–1.60x</span>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-bullet" style="background:#ef4444;"></div>
+              <span>HIGH</span>
+              <span style="margin-left:auto;">&gt;1.60x</span>
+            </div>
+
+            <div class="risk-item" style="margin-top:6px;">
+              <span style="font-size:9px;">Current: 1.17x → moderate regime</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  (function() {
-    // ---------- 42 STARLINK SATELLITES (realistic) ----------
-    const sats = [];
-    for (let i = 1; i <= 42; i++) {
-      let num = 2000 + i;
-      if (i === 1) num = 2984;
-      const alt = (i === 1) ? 534 : (480 + Math.floor(Math.random() * 120));
-      const incOptions = [53, 70, 97.6, 110, 130];
-      const inc = (i === 1) ? 70.1 : incOptions[Math.floor(Math.random() * incOptions.length)];
-      let risk = 'low';
-      if (i <= 3) risk = 'high';
-      else if (i <= 12) risk = 'mid';
-      sats.push({
-        id: i-1,
-        name: `STARLINK-${num}`,
-        altitude: alt,
-        inclination: inc,
-        velocity: (7.5 + Math.random() * 0.35).toFixed(2),
-        raan: (Math.random() * 360).toFixed(1),
-        argPerigee: (Math.random() * 360).toFixed(1),
-        meanAnomaly: (Math.random() * 360).toFixed(1),
-        dragRisk: risk === 'high' ? 'ELEVATED' : (risk === 'mid' ? 'MODERATE' : 'LOW'),
-        atmDensity: (0.95 + Math.random() * 0.45).toFixed(2),
-        decay: (0.008 + Math.random() * 0.022).toFixed(3),
-        angle: Math.random() * Math.PI * 2,
-        speed: 0.0011 + Math.random() * 0.0023,
-        radiusMult: 1.18 + Math.random() * 0.9,
-        tilt: -1.5 + Math.random() * 3.0,
-        riskLevel: risk,
-        paused: false
-      });
-    }
-    // override STL-2984 details
-    sats[0].altitude = 534;
-    sats[0].inclination = 70.1;
-    sats[0].velocity = "7.61";
-    sats[0].raan = "128.7";
-    sats[0].argPerigee = "87.4";
-    sats[0].meanAnomaly = "205.3";
-    sats[0].dragRisk = "ELEVATED";
-    sats[0].atmDensity = "1.17";
-    sats[0].decay = "0.018";
+  <script>
+    (function () {
+      // ---------- 42 STARLINK SATELLITES ----------
+      const sats = [];
 
-    let currentSat = sats[0];
-    const selectEl = document.getElementById('satSelect');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const detailsDiv = document.getElementById('satDetails');
+      for (let i = 1; i <= 42; i++) {
+        let num = 2000 + i;
 
-    function populateDropdown(filter = "") {
-      const filtered = sats.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
-      selectEl.innerHTML = '<option value="">-- Select satellite --</option>';
-      filtered.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = `${s.name}  |  ${s.altitude}km  |  ${s.inclination}°`;
-        selectEl.appendChild(opt);
-      });
-    }
+        if (i === 1) num = 2984;
 
-    function updateDetailsPanel(sat) {
-      detailsDiv.innerHTML = `
-        <div class="sat-title">
-          <h3>${sat.name}</h3>
-          <span class="track-badge">${sat.paused ? '⏺ TRACKED' : '● ACTIVE'}</span>
-        </div>
-        <div style="display:flex; justify-content:center; gap:16px; background:rgba(20,55,90,0.4); border-radius:60px; padding:8px; margin:6px 0;">
-          <span style="font-size:26px;">🛰️</span><span style="font-size:22px;">⚡</span>
-        </div>
-        <div class="sat-info">
-          <div class="info-row"><span class="info-label">Altitude</span><span class="info-value">${sat.altitude} km</span></div>
-          <div class="info-row"><span class="info-label">Inclination</span><span class="info-value">${sat.inclination}°</span></div>
-          <div class="info-row"><span class="info-label">Velocity</span><span class="info-value">${sat.velocity} km/s</span></div>
-          <div class="info-row"><span class="info-label">RAAN</span><span class="info-value">${sat.raan}°</span></div>
-          <div class="info-row"><span class="info-label">Arg. Perigee</span><span class="info-value">${sat.argPerigee}°</span></div>
-          <div class="info-row"><span class="info-label">Mean Anomaly</span><span class="info-value">${sat.meanAnomaly}°</span></div>
-          <div class="info-row"><span class="info-label">Drag Risk</span><span class="info-value warning-value">${sat.dragRisk}</span></div>
-          <div class="info-row"><span class="info-label">Atm. Density</span><span class="info-value">${sat.atmDensity}× base</span></div>
-          <div class="info-row"><span class="info-label">Decay rate</span><span class="info-value">${sat.decay} km/orbit</span></div>
-          <div class="info-row"><span class="info-label">Epoch (UTC)</span><span class="info-value">${new Date().toISOString().slice(11,19)}</span></div>
-        </div>
-        <div style="background:rgba(30,75,115,0.6); border-radius:40px; text-align:center; padding:8px; font-size:10px; margin-top:8px;">📡 LIVE TELEMETRY →</div>
-      `;
-    }
+        const alt = i === 1 ? 534 : 480 + Math.floor(Math.random() * 120);
+        const incOptions = [53, 70, 97.6, 110, 130];
+        const inc = i === 1 ? 70.1 : incOptions[Math.floor(Math.random() * incOptions.length)];
 
-    function selectSatellite(sat) {
-      sats.forEach(s => { s.paused = false; });
-      sat.paused = true;
-      currentSat = sat;
-      updateDetailsPanel(sat);
-    }
+        let risk = 'low';
 
-    selectEl.addEventListener('change', (e) => {
-      const id = parseInt(e.target.value);
-      const sat = sats.find(s => s.id === id);
-      if (sat) selectSatellite(sat);
-    });
-    searchBtn.addEventListener('click', () => populateDropdown(searchInput.value));
-    searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') populateDropdown(searchInput.value); });
-    populateDropdown("");
-    selectSatellite(sats[0]);
+        if (i <= 3) risk = 'high';
+        else if (i <= 12) risk = 'mid';
 
-    // ---------- EARTH CANVAS (NO ORBIT LINES, BIG EARTH) ----------
-    const canvas = document.getElementById('earthCanvas');
-    let ctx = canvas.getContext('2d');
-    const container = canvas.parentElement;
-    let width, height;
+        sats.push({
+          id: i - 1,
+          name: `STARLINK-${num}`,
+          altitude: alt,
+          inclination: inc,
+          velocity: (7.5 + Math.random() * 0.35).toFixed(2),
+          raan: (Math.random() * 360).toFixed(1),
+          argPerigee: (Math.random() * 360).toFixed(1),
+          meanAnomaly: (Math.random() * 360).toFixed(1),
+          dragRisk: risk === 'high' ? 'ELEVATED' : risk === 'mid' ? 'MODERATE' : 'LOW',
+          atmDensity: (0.95 + Math.random() * 0.45).toFixed(2),
+          decay: (0.008 + Math.random() * 0.022).toFixed(3),
+          angle: Math.random() * Math.PI * 2,
+          speed: 0.0011 + Math.random() * 0.0023,
 
-    function resizeEarth() {
-      const rect = container.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width;
-      canvas.height = height;
-      drawFrame();
-    }
+          // Keeps satellites close enough to remain visible inside the Earth panel.
+          radiusMult: 1.14 + Math.random() * 0.38,
 
-    const stars = Array.from({ length: 500 }, () => ({ x: Math.random() * 3000, y: Math.random() * 2000, r: Math.random() * 1.5 + 0.3, alpha: 0.3 + Math.random() * 0.7 }));
-    let anim = 0;
-
-    function drawFrame() {
-      if (!ctx || width === 0) return;
-      ctx.clearRect(0, 0, width, height);
-      for (let s of stars) {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 248, 220, ${s.alpha * 0.55})`;
-        ctx.arc((s.x + anim * 0.2) % width, (s.y + anim * 0.06) % height, s.r, 0, Math.PI * 2);
-        ctx.fill();
+          tilt: -1.5 + Math.random() * 3.0,
+          riskLevel: risk,
+          paused: false
+        });
       }
-      const centerX = width * 0.5;
-      const centerY = height * 0.52;
-      let earthRadius = Math.min(width * 0.44, height * 0.52, 280);
-      if (earthRadius < 160) earthRadius = width * 0.42;
-      
-      // draw satellites (paused ones stay still)
-      for (let sat of sats) {
-        if (!sat.paused) sat.angle += sat.speed;
-        const rx = sat.radiusMult * earthRadius;
-        const ry = rx * 0.38;
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(sat.tilt);
-        const xDot = Math.cos(sat.angle) * rx;
-        const yDot = Math.sin(sat.angle) * ry;
-        let color = '#b0dcff';
-        if (sat.riskLevel === 'high') color = '#ff7a6e';
-        else if (sat.riskLevel === 'mid') color = '#ffbc6e';
-        const selected = (currentSat && currentSat.id === sat.id);
-        if (selected) {
-          ctx.shadowBlur = 12;
-          ctx.shadowColor = '#ffdd99';
-          ctx.fillStyle = '#ffffff';
+
+      // Override STARLINK-2984 details.
+      sats[0].altitude = 534;
+      sats[0].inclination = 70.1;
+      sats[0].velocity = '7.61';
+      sats[0].raan = '128.7';
+      sats[0].argPerigee = '87.4';
+      sats[0].meanAnomaly = '205.3';
+      sats[0].dragRisk = 'ELEVATED';
+      sats[0].atmDensity = '1.17';
+      sats[0].decay = '0.018';
+
+      let currentSat = sats[0];
+
+      const selectEl = document.getElementById('satSelect');
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const detailsDiv = document.getElementById('satDetails');
+
+      function populateDropdown(filter = '') {
+        const filtered = sats.filter((s) =>
+          s.name.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        selectEl.innerHTML = '<option value="">-- Select satellite --</option>';
+
+        filtered.forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = `${s.name}  |  ${s.altitude}km  |  ${s.inclination}°`;
+          selectEl.appendChild(opt);
+        });
+      }
+
+      function updateDetailsPanel(sat) {
+        detailsDiv.innerHTML = `
+          <div class="sat-title">
+            <h3>${sat.name}</h3>
+            <span class="track-badge">${sat.paused ? 'TRACKED' : 'ACTIVE'}</span>
+          </div>
+
+          <div style="
+            display:flex;
+            justify-content:center;
+            gap:16px;
+            background:rgba(20,55,90,0.4);
+            border-radius:60px;
+            padding:8px;
+            margin:6px 0 10px;
+          ">
+            <span style="font-size:26px;">🛰️</span>
+            <span style="font-size:22px;">⚡</span>
+          </div>
+
+          <div class="sat-info">
+            <div class="info-row">
+              <span class="info-label">Altitude</span>
+              <span class="info-value">${sat.altitude} km</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Inclination</span>
+              <span class="info-value">${sat.inclination}°</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Velocity</span>
+              <span class="info-value">${sat.velocity} km/s</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">RAAN</span>
+              <span class="info-value">${sat.raan}°</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Arg. Perigee</span>
+              <span class="info-value">${sat.argPerigee}°</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Mean Anomaly</span>
+              <span class="info-value">${sat.meanAnomaly}°</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Drag Risk</span>
+              <span class="info-value warning-value">${sat.dragRisk}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Atm. Density</span>
+              <span class="info-value">${sat.atmDensity}× base</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Decay rate</span>
+              <span class="info-value">${sat.decay} km/orbit</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Epoch UTC</span>
+              <span class="info-value">${new Date().toISOString().slice(11, 19)}</span>
+            </div>
+          </div>
+
+          <div style="
+            background:rgba(30,75,115,0.6);
+            border-radius:40px;
+            text-align:center;
+            padding:8px;
+            font-size:10px;
+            margin-top:10px;
+            font-weight:700;
+            color:#d8edff;
+          ">
+            LIVE TELEMETRY →
+          </div>
+        `;
+      }
+
+      function selectSatellite(sat) {
+        sats.forEach((s) => {
+          s.paused = false;
+        });
+
+        sat.paused = true;
+        currentSat = sat;
+        updateDetailsPanel(sat);
+      }
+
+      selectEl.addEventListener('change', (e) => {
+        const id = parseInt(e.target.value, 10);
+        const sat = sats.find((s) => s.id === id);
+
+        if (sat) selectSatellite(sat);
+      });
+
+      searchBtn.addEventListener('click', () => {
+        populateDropdown(searchInput.value);
+      });
+
+      searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') populateDropdown(searchInput.value);
+      });
+
+      populateDropdown('');
+      selectSatellite(sats[0]);
+
+      // ---------- EARTH CANVAS ----------
+      const canvas = document.getElementById('earthCanvas');
+      const ctx = canvas.getContext('2d');
+      const container = canvas.parentElement;
+
+      let width = 0;
+      let height = 0;
+      let anim = 0;
+
+      const stars = Array.from({ length: 500 }, () => ({
+        x: Math.random() * 3000,
+        y: Math.random() * 2000,
+        r: Math.random() * 1.5 + 0.3,
+        alpha: 0.3 + Math.random() * 0.7
+      }));
+
+      function resizeEarth() {
+        const rect = container.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        width = rect.width;
+        height = rect.height;
+
+        canvas.width = Math.max(1, Math.floor(width * dpr));
+        canvas.height = Math.max(1, Math.floor(height * dpr));
+
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        drawFrame();
+      }
+
+      function drawStars() {
+        for (const s of stars) {
           ctx.beginPath();
-          ctx.arc(xDot, yDot, 5.2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(xDot, yDot, 7.5, 0, Math.PI * 2);
-          ctx.strokeStyle = '#ffcc99';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        } else {
-          ctx.shadowBlur = sat.riskLevel === 'high' ? 6 : 2;
-          ctx.shadowColor = color;
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(xDot, yDot, sat.riskLevel === 'high' ? 3.6 : 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 248, 220, ${s.alpha * 0.55})`;
+          ctx.arc(
+            (s.x + anim * 0.2) % width,
+            (s.y + anim * 0.06) % height,
+            s.r,
+            0,
+            Math.PI * 2
+          );
           ctx.fill();
         }
+      }
+
+      function drawEarth(centerX, centerY, earthRadius) {
+        // Outer atmospheric glow.
+        ctx.globalAlpha = 0.22;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, earthRadius + 18, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(100, 180, 250, 0.16)';
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+
+        // Main Earth sphere.
+        const grad = ctx.createRadialGradient(
+          centerX - earthRadius * 0.22,
+          centerY - earthRadius * 0.25,
+          8,
+          centerX,
+          centerY,
+          earthRadius
+        );
+
+        grad.addColorStop(0, '#2d8cc6');
+        grad.addColorStop(0.44, '#135f93');
+        grad.addColorStop(0.78, '#073252');
+        grad.addColorStop(1, '#010f19');
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Continents / land texture.
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+        ctx.clip();
+
+        ctx.globalAlpha = 0.32;
+        ctx.fillStyle = '#c9e6b4';
+
+        for (let i = 0; i < 20; i++) {
+          ctx.beginPath();
+
+          const offX =
+            Math.sin(anim * 0.0022 + i * 1.3) * earthRadius * 0.48;
+          const offY =
+            Math.cos(anim * 0.0019 + i * 0.85) * earthRadius * 0.42;
+
+          ctx.ellipse(
+            centerX + offX,
+            centerY + offY,
+            earthRadius * 0.11,
+            earthRadius * 0.075,
+            Math.sin(i) * 0.8,
+            0,
+            Math.PI * 2
+          );
+
+          ctx.fill();
+        }
+
+        // City lights.
+        ctx.globalAlpha = 0.46;
+        ctx.fillStyle = '#f7eabe';
+
+        for (let i = 0; i < 45; i++) {
+          ctx.beginPath();
+
+          ctx.arc(
+            centerX + Math.sin(i * 5.2 + anim * 0.003) * earthRadius * 0.44,
+            centerY + Math.cos(i * 3.8) * earthRadius * 0.38,
+            1.7,
+            0,
+            Math.PI * 2
+          );
+
+          ctx.fill();
+        }
+
+        // Dark terminator overlay.
+        const shadow = ctx.createLinearGradient(
+          centerX - earthRadius,
+          centerY,
+          centerX + earthRadius,
+          centerY
+        );
+
+        shadow.addColorStop(0, 'rgba(0, 0, 0, 0.05)');
+        shadow.addColorStop(0.55, 'rgba(0, 0, 0, 0.04)');
+        shadow.addColorStop(1, 'rgba(0, 0, 0, 0.48)');
+
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+        ctx.fillStyle = shadow;
+        ctx.fill();
+
         ctx.restore();
-      }
-      ctx.shadowBlur = 0;
-      
-      // Earth gradient + texture (no orbits)
-      const grad = ctx.createRadialGradient(centerX - 14, centerY - 12, 8, centerX, centerY, earthRadius);
-      grad.addColorStop(0, '#0e416b');
-      grad.addColorStop(0.6, '#1f6a9b');
-      grad.addColorStop(1, '#021826');
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
-      ctx.globalAlpha = 0.28;
-      ctx.fillStyle = '#c9e6b4';
-      for (let i = 0; i < 20; i++) {
+
+        // Rim.
         ctx.beginPath();
-        let offX = Math.sin(anim * 0.0022 + i * 1.3) * earthRadius * 0.48;
-        let offY = Math.cos(anim * 0.0019 + i * 0.85) * earthRadius * 0.42;
-        ctx.ellipse(centerX + offX, centerY + offY, earthRadius * 0.1, earthRadius * 0.075, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(165, 218, 255, 0.36)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       }
-      ctx.globalAlpha = 0.45;
-      ctx.fillStyle = '#f7eabe';
-      for (let i = 0; i < 45; i++) {
-        ctx.beginPath();
-        ctx.arc(centerX + (Math.sin(i * 5.2 + anim * 0.003) * earthRadius * 0.44), centerY + (Math.cos(i * 3.8) * earthRadius * 0.38), 1.7, 0, Math.PI * 2);
-        ctx.fill();
+
+      function drawSatellites(centerX, centerY, earthRadius) {
+        for (const sat of sats) {
+          if (!sat.paused) sat.angle += sat.speed;
+
+          const rx = sat.radiusMult * earthRadius;
+          const ry = rx * 0.38;
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(sat.tilt);
+
+          const xDot = Math.cos(sat.angle) * rx;
+          const yDot = Math.sin(sat.angle) * ry;
+
+          let color = '#b0dcff';
+
+          if (sat.riskLevel === 'high') color = '#ff7a6e';
+          else if (sat.riskLevel === 'mid') color = '#ffbc6e';
+
+          const selected = currentSat && currentSat.id === sat.id;
+
+          if (selected) {
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = '#ffdd99';
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(xDot, yDot, 5.4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(xDot, yDot, 8.4, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ffcc99';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+          } else {
+            ctx.shadowBlur = sat.riskLevel === 'high' ? 7 : 3;
+            ctx.shadowColor = color;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(xDot, yDot, sat.riskLevel === 'high' ? 3.6 : 2.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+
+        ctx.shadowBlur = 0;
       }
-      ctx.globalAlpha = 0.2;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, earthRadius + 9, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(100, 180, 250, 0.12)';
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
 
-    function animate() {
-      anim += 16;
-      drawFrame();
-      requestAnimationFrame(animate);
-    }
+      function drawFrame() {
+        if (!ctx || width <= 0 || height <= 0) return;
 
-    const resizeObserver = new ResizeObserver(() => resizeEarth());
-    resizeObserver.observe(container);
-    resizeEarth();
-    animate();
+        ctx.clearRect(0, 0, width, height);
 
-    // UTC clock
-    setInterval(() => {
-      document.getElementById('utcClock').innerText = new Date().toISOString().slice(11, 19);
-    }, 1000);
+        drawStars();
 
-    // CHARTS (density & KP)
-    function drawDensity() {
-      const c = document.getElementById('densityCanvas');
-      if (!c) return;
-      const w = c.clientWidth, h = c.clientHeight;
-      c.width = w; c.height = h;
-      const ctx2 = c.getContext('2d');
-      const data = [0.82,0.79,0.85,0.90,0.87,0.93,0.96,1.00,1.03,0.99,1.02,1.05,1.08,1.12,1.09,1.13,1.16,1.12,1.18,1.21,1.24,1.20,1.27,1.30,1.34,1.37,1.32,1.39,1.43,1.47,1.50];
-      const maxV = 1.62;
-      const padL = 24, padR = 8, padT = 8, padB = 10;
-      const step = (w - padL - padR) / (data.length - 1);
-      ctx2.clearRect(0,0,w,h);
-      ctx2.beginPath();
-      for (let i=0; i<data.length; i++) {
-        let x = padL + i*step;
-        let y = h - padB - (data[i]/maxV)*(h - padT - padB);
-        if (i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
+        const centerX = width * 0.5;
+        const centerY = height * 0.52;
+
+        /*
+          Earth remains large but not clipped.
+          Satellites remain visible inside the same canvas.
+        */
+        let earthRadius = Math.min(width * 0.34, height * 0.46, 310);
+        earthRadius = Math.max(150, earthRadius);
+
+        // Draw Earth first, then satellites above it.
+        drawEarth(centerX, centerY, earthRadius);
+        drawSatellites(centerX, centerY, earthRadius);
       }
-      ctx2.lineTo(w-padR, h-padB);
-      ctx2.lineTo(padL, h-padB);
-      ctx2.fillStyle = 'rgba(60, 180, 255, 0.12)';
-      ctx2.fill();
-      ctx2.beginPath();
-      for (let i=0; i<data.length; i++) {
-        let x = padL + i*step;
-        let y = h - padB - (data[i]/maxV)*(h - padT - padB);
-        if (i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
-      }
-      ctx2.strokeStyle = '#5bb4ff';
-      ctx2.lineWidth = 1.8;
-      ctx2.stroke();
-      let lastX = padL + (data.length-1)*step;
-      let lastY = h - padB - (data[data.length-1]/maxV)*(h - padT - padB);
-      ctx2.fillStyle = '#ffb85c';
-      ctx2.beginPath();
-      ctx2.arc(lastX, lastY, 3, 0, Math.PI*2);
-      ctx2.fill();
-    }
 
-    function drawKp() {
-      const c = document.getElementById('kpCanvas');
-      if (!c) return;
-      const w = c.clientWidth, h = c.clientHeight;
-      c.width = w; c.height = h;
-      const ctx2 = c.getContext('2d');
-      const kp = [1.2,1.5,1.8,2.4,2.1,1.9,2.8,3.2,3.5,2.9,3.8,4.0,3.5,4.2,4.5,3.8,4.8,4.2,3.5,3.8,4.5,5.0,4.8,5.3];
-      const maxK = 9;
-      const padL = 24, padR = 8, padT = 8, padB = 10;
-      const barW = (w - padL - padR) / kp.length - 1.2;
-      ctx2.clearRect(0,0,w,h);
-      for (let i=0; i<kp.length; i++) {
-        let barH = (kp[i]/maxK)*(h - padT - padB);
-        let x = padL + i*(barW+1.2);
-        let y = h - padB - barH;
-        let r=80,g=190,b=255;
-        if (kp[i]>=5) { r=255; g=140; b=50; }
-        else if (kp[i]>=4) { r=255; g=185; b=65; }
-        ctx2.fillStyle = `rgb(${r},${g},${b})`;
-        ctx2.shadowBlur = 2;
-        ctx2.fillRect(x, y, barW, barH);
+      function animate() {
+        anim += 16;
+        drawFrame();
+        requestAnimationFrame(animate);
       }
-      ctx2.shadowBlur = 0;
-    }
 
-    function buildOrbitalGrid() {
-      const container = document.getElementById('orbitalGrid');
-      if (!container) return;
-      const planes = [
-        { name:"53°", now:8, ago6:7, ago12:8, ago18:7 },
-        { name:"70°", now:14, ago6:13, ago12:12, ago18:12 },
-        { name:"97.6°", now:8, ago6:9, ago12:7, ago18:8 },
-        { name:"110°", now:8, ago6:7, ago12:8, ago18:6 },
-        { name:"130°", now:4, ago6:6, ago12:4, ago18:5 }
-      ];
-      container.innerHTML = '';
-      planes.forEach(p => {
-        const col = document.createElement('div');
-        col.className = 'orb-col';
-        col.innerHTML = `
-          <div class="inc-badge">${p.name}</div>
-          <div class="time-label">NOW</div><div class="dot-cluster" id="now-${p.name.replace('°','')}"></div>
-          <div class="time-label">6h ago</div><div class="dot-cluster" id="ag6-${p.name.replace('°','')}"></div>
-          <div class="time-label">12h ago</div><div class="dot-cluster" id="ag12-${p.name.replace('°','')}"></div>
-          <div class="time-label">18h ago</div><div class="dot-cluster" id="ag18-${p.name.replace('°','')}"></div>
-        `;
-        container.appendChild(col);
+      const resizeObserver = new ResizeObserver(() => resizeEarth());
+      resizeObserver.observe(container);
+
+      resizeEarth();
+      animate();
+
+      // ---------- UTC CLOCK ----------
+      function updateClock() {
+        const el = document.getElementById('utcClock');
+
+        if (el) {
+          el.innerText = new Date().toISOString().slice(11, 19);
+        }
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // ---------- CHARTS ----------
+      function drawDensity() {
+        const c = document.getElementById('densityCanvas');
+
+        if (!c) return;
+
+        const w = c.clientWidth;
+        const h = c.clientHeight;
+
+        c.width = w;
+        c.height = h;
+
+        const ctx2 = c.getContext('2d');
+
+        const data = [
+          0.82, 0.79, 0.85, 0.90, 0.87, 0.93, 0.96, 1.00,
+          1.03, 0.99, 1.02, 1.05, 1.08, 1.12, 1.09, 1.13,
+          1.16, 1.12, 1.18, 1.21, 1.24, 1.20, 1.27, 1.30,
+          1.34, 1.37, 1.32, 1.39, 1.43, 1.47, 1.50
+        ];
+
+        const maxV = 1.62;
+        const padL = 24;
+        const padR = 8;
+        const padT = 8;
+        const padB = 10;
+        const step = (w - padL - padR) / (data.length - 1);
+
+        ctx2.clearRect(0, 0, w, h);
+
+        ctx2.beginPath();
+
+        for (let i = 0; i < data.length; i++) {
+          const x = padL + i * step;
+          const y = h - padB - (data[i] / maxV) * (h - padT - padB);
+
+          if (i === 0) ctx2.moveTo(x, y);
+          else ctx2.lineTo(x, y);
+        }
+
+        ctx2.lineTo(w - padR, h - padB);
+        ctx2.lineTo(padL, h - padB);
+        ctx2.closePath();
+
+        ctx2.fillStyle = 'rgba(60, 180, 255, 0.12)';
+        ctx2.fill();
+
+        ctx2.beginPath();
+
+        for (let i = 0; i < data.length; i++) {
+          const x = padL + i * step;
+          const y = h - padB - (data[i] / maxV) * (h - padT - padB);
+
+          if (i === 0) ctx2.moveTo(x, y);
+          else ctx2.lineTo(x, y);
+        }
+
+        ctx2.strokeStyle = '#5bb4ff';
+        ctx2.lineWidth = 1.8;
+        ctx2.stroke();
+
+        const lastX = padL + (data.length - 1) * step;
+        const lastY =
+          h - padB - (data[data.length - 1] / maxV) * (h - padT - padB);
+
+        ctx2.fillStyle = '#ffb85c';
+        ctx2.beginPath();
+        ctx2.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx2.fill();
+      }
+
+      function drawKp() {
+        const c = document.getElementById('kpCanvas');
+
+        if (!c) return;
+
+        const w = c.clientWidth;
+        const h = c.clientHeight;
+
+        c.width = w;
+        c.height = h;
+
+        const ctx2 = c.getContext('2d');
+
+        const kp = [
+          1.2, 1.5, 1.8, 2.4, 2.1, 1.9,
+          2.8, 3.2, 3.5, 2.9, 3.8, 4.0,
+          3.5, 4.2, 4.5, 3.8, 4.8, 4.2,
+          3.5, 3.8, 4.5, 5.0, 4.8, 5.3
+        ];
+
+        const maxK = 9;
+        const padL = 24;
+        const padR = 8;
+        const padT = 8;
+        const padB = 10;
+        const barW = (w - padL - padR) / kp.length - 1.2;
+
+        ctx2.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < kp.length; i++) {
+          const barH = (kp[i] / maxK) * (h - padT - padB);
+          const x = padL + i * (barW + 1.2);
+          const y = h - padB - barH;
+
+          let r = 80;
+          let g = 190;
+          let b = 255;
+
+          if (kp[i] >= 5) {
+            r = 255;
+            g = 140;
+            b = 50;
+          } else if (kp[i] >= 4) {
+            r = 255;
+            g = 185;
+            b = 65;
+          }
+
+          ctx2.fillStyle = `rgb(${r},${g},${b})`;
+          ctx2.shadowBlur = 2;
+          ctx2.fillRect(x, y, Math.max(1, barW), barH);
+        }
+
+        ctx2.shadowBlur = 0;
+      }
+
+      function buildOrbitalGrid() {
+        const container = document.getElementById('orbitalGrid');
+
+        if (!container) return;
+
+        const planes = [
+          { name: '53°', now: 8, ago6: 7, ago12: 8, ago18: 7 },
+          { name: '70°', now: 14, ago6: 13, ago12: 12, ago18: 12 },
+          { name: '97.6°', now: 8, ago6: 9, ago12: 7, ago18: 8 },
+          { name: '110°', now: 8, ago6: 7, ago12: 8, ago18: 6 },
+          { name: '130°', now: 4, ago6: 6, ago12: 4, ago18: 5 }
+        ];
+
+        container.innerHTML = '';
+
+        planes.forEach((p) => {
+          const safe = p.name.replace('°', '').replace('.', '-');
+
+          const col = document.createElement('div');
+          col.className = 'orb-col';
+
+          col.innerHTML = `
+            <div class="inc-badge">${p.name}</div>
+
+            <div class="time-label">NOW</div>
+            <div class="dot-cluster" id="now-${safe}"></div>
+
+            <div class="time-label">6h ago</div>
+            <div class="dot-cluster" id="ag6-${safe}"></div>
+
+            <div class="time-label">12h ago</div>
+            <div class="dot-cluster" id="ag12-${safe}"></div>
+
+            <div class="time-label">18h ago</div>
+            <div class="dot-cluster" id="ag18-${safe}"></div>
+          `;
+
+          container.appendChild(col);
+        });
+
+        planes.forEach((p) => {
+          const safe = p.name.replace('°', '').replace('.', '-');
+
+          const fill = (id, count, cls) => {
+            const el = document.getElementById(id);
+
+            if (!el) return;
+
+            el.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+              const d = document.createElement('div');
+              d.className = `dot ${cls}`;
+              el.appendChild(d);
+            }
+          };
+
+          fill(`now-${safe}`, p.now, 'dot-current');
+          fill(`ag6-${safe}`, p.ago6, 'dot-6h');
+          fill(`ag12-${safe}`, p.ago12, 'dot-12h');
+          fill(`ag18-${safe}`, p.ago18, 'dot-18h');
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        drawDensity();
+        drawKp();
       });
-      planes.forEach(p => {
-        const safe = p.name.replace('°','');
-        const fill = (id, cnt, cls) => {
-          const el = document.getElementById(id);
-          if (el) { el.innerHTML = ''; for (let i=0; i<cnt; i++) { let d = document.createElement('div'); d.className = `dot ${cls}`; el.appendChild(d); } }
-        };
-        fill(`now-${safe}`, p.now, 'dot-current');
-        fill(`ag6-${safe}`, p.ago6, 'dot-6h');
-        fill(`ag12-${safe}`, p.ago12, 'dot-12h');
-        fill(`ag18-${safe}`, p.ago18, 'dot-18h');
-      });
-    }
 
-    window.addEventListener('resize', () => { drawDensity(); drawKp(); });
-    drawDensity(); drawKp(); buildOrbitalGrid();
-  })();
-</script>
+      drawDensity();
+      drawKp();
+      buildOrbitalGrid();
+    })();
+  </script>
 </body>
 </html>
-```
