@@ -1,16 +1,388 @@
-<script type="module" crossorigin src="/space_weather_official_risk/assets/index-BPbK5c4S.js"></script>
-<link rel="stylesheet" crossorigin href="/space_weather_official_risk/assets/index-uriOqhJD.css">
-<div id="app">
-  <canvas id="scene"></canvas>
+cat > docs/index.html <<'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Space Weather Risk Globe</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at 70% 30%, #12345c, #020713 55%, #000);
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    .hud {
+      position: fixed;
+      left: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 440px;
+      padding: 30px;
+      border-radius: 28px;
+      background: rgba(4, 12, 28, 0.68);
+      border: 1px solid rgba(126, 231, 255, 0.22);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.45);
+      z-index: 5;
+    }
+
+    .eyebrow {
+      color: #7ee7ff;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 7vw, 5.7rem);
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+    }
+
+    .hud p {
+      color: #b9cce5;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+      margin-top: 22px;
+    }
+
+    .cards div {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cards strong {
+      display: block;
+      font-size: 1.45rem;
+    }
+
+    .cards span {
+      color: #9fb3c8;
+      font-size: 0.8rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      color: #b9cce5;
+      font-size: 0.9rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .low { background: #77f7d2; box-shadow: 0 0 14px #77f7d2; }
+    .medium { background: #ffd166; box-shadow: 0 0 14px #ffd166; }
+    .high { background: #ff6b6b; box-shadow: 0 0 14px #ff6b6b; }
+
+    .hint {
+      position: fixed;
+      right: 32px;
+      bottom: 26px;
+      color: #8ca6c0;
+      z-index: 4;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 780px) {
+      .hud {
+        left: 16px;
+        right: 16px;
+        width: auto;
+        top: auto;
+        bottom: 20px;
+        transform: none;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="space"></canvas>
+
   <section class="hud">
-    <p class="eyebrow">LEO Satellite Risk Intelligence</p>
+    <div class="eyebrow">LEO Satellite Risk Intelligence</div>
     <h1>Space Weather Risk Globe</h1>
-    <p>Cinematic orbital-risk visualisation for low Earth orbit satellites under atmospheric drag stress.</p>
+    <p>
+      A clean browser visualisation of low Earth orbit satellite drag-stress risk
+      under changing atmospheric density.
+    </p>
+
     <div class="cards">
-      <div><strong>18</strong><span>satellites</span></div>
+      <div><strong>36</strong><span>orbiting satellites</span></div>
       <div><strong>90m</strong><span>forecast window</span></div>
       <div><strong>3</strong><span>risk classes</span></div>
     </div>
+
+    <div class="legend">
+      <span><i class="dot low"></i>Low</span>
+      <span><i class="dot medium"></i>Medium</span>
+      <span><i class="dot high"></i>High</span>
+    </div>
   </section>
-  <div id="tooltip"></div>
-</div>
+
+  <div class="hint">Rotating Earth · twinkling satellites · animated orbital risk</div>
+
+  <script>
+    const canvas = document.getElementById("space");
+    const ctx = canvas.getContext("2d");
+
+    let width;
+    let height;
+    let centreX;
+    let centreY;
+    let earthRadius;
+
+    const satellites = [];
+    const stars = [];
+
+    function resize() {
+      width = canvas.width = window.innerWidth * devicePixelRatio;
+      height = canvas.height = window.innerHeight * devicePixelRatio;
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+      centreX = window.innerWidth * 0.66;
+      centreY = window.innerHeight * 0.5;
+      earthRadius = Math.min(window.innerWidth, window.innerHeight) * 0.22;
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    for (let i = 0; i < 220; i++) {
+      stars.push({
+        x: Math.random(),
+        y: Math.random(),
+        r: Math.random() * 1.5 + 0.2,
+        a: Math.random(),
+        s: Math.random() * 0.02 + 0.004
+      });
+    }
+
+    const riskPalette = [
+      { label: "Low", colour: "#77f7d2" },
+      { label: "Low", colour: "#77f7d2" },
+      { label: "Medium", colour: "#ffd166" },
+      { label: "High", colour: "#ff6b6b" }
+    ];
+
+    for (let i = 0; i < 36; i++) {
+      const risk = riskPalette[Math.floor(Math.random() * riskPalette.length)];
+
+      satellites.push({
+        angle: Math.random() * Math.PI * 2,
+        speed: 0.004 + Math.random() * 0.008,
+        radius: 1.25 + Math.random() * 0.85,
+        tilt: -0.85 + Math.random() * 1.7,
+        size: 2.2 + Math.random() * 2.4,
+        pulse: Math.random() * Math.PI * 2,
+        colour: risk.colour,
+        risk: risk.label
+      });
+    }
+
+    function drawStars(time) {
+      stars.forEach(star => {
+        star.a += star.s;
+        const alpha = 0.25 + Math.sin(star.a + time * 0.001) * 0.35;
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${Math.max(0.08, alpha)})`;
+        ctx.arc(star.x * window.innerWidth, star.y * window.innerHeight, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawEarth(time) {
+      const rotation = time * 0.00045;
+
+      const glow = ctx.createRadialGradient(
+        centreX, centreY, earthRadius * 0.85,
+        centreX, centreY, earthRadius * 1.55
+      );
+      glow.addColorStop(0, "rgba(80,190,255,0.28)");
+      glow.addColorStop(1, "rgba(80,190,255,0)");
+
+      ctx.beginPath();
+      ctx.fillStyle = glow;
+      ctx.arc(centreX, centreY, earthRadius * 1.55, 0, Math.PI * 2);
+      ctx.fill();
+
+      const earthGradient = ctx.createRadialGradient(
+        centreX - earthRadius * 0.35,
+        centreY - earthRadius * 0.35,
+        earthRadius * 0.1,
+        centreX,
+        centreY,
+        earthRadius
+      );
+
+      earthGradient.addColorStop(0, "#8feaff");
+      earthGradient.addColorStop(0.28, "#287ed8");
+      earthGradient.addColorStop(0.72, "#0d376f");
+      earthGradient.addColorStop(1, "#061126");
+
+      ctx.beginPath();
+      ctx.fillStyle = earthGradient;
+      ctx.arc(centreX, centreY, earthRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centreX, centreY, earthRadius, 0, Math.PI * 2);
+      ctx.clip();
+
+      for (let i = 0; i < 8; i++) {
+        const x =
+          centreX +
+          Math.sin(rotation + i * 1.7) * earthRadius * 0.6 +
+          Math.cos(rotation * 0.6 + i) * earthRadius * 0.18;
+
+        const y =
+          centreY +
+          Math.cos(rotation * 0.75 + i * 0.9) * earthRadius * 0.42;
+
+        ctx.beginPath();
+        ctx.fillStyle = i % 2 === 0 ? "#2eb872" : "#46c98a";
+        ctx.ellipse(
+          x,
+          y,
+          earthRadius * (0.22 + (i % 3) * 0.04),
+          earthRadius * (0.08 + (i % 2) * 0.04),
+          rotation + i,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const x = centreX + Math.sin(-rotation * 1.4 + i * 2) * earthRadius * 0.68;
+        const y = centreY + Math.cos(rotation + i) * earthRadius * 0.45;
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,255,255,0.18)";
+        ctx.ellipse(x, y, earthRadius * 0.2, earthRadius * 0.045, rotation, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      ctx.beginPath();
+      const shadow = ctx.createRadialGradient(
+        centreX - earthRadius * 0.25,
+        centreY - earthRadius * 0.25,
+        earthRadius * 0.2,
+        centreX + earthRadius * 0.25,
+        centreY + earthRadius * 0.25,
+        earthRadius
+      );
+      shadow.addColorStop(0, "rgba(255,255,255,0.18)");
+      shadow.addColorStop(0.55, "rgba(0,0,0,0)");
+      shadow.addColorStop(1, "rgba(0,0,0,0.55)");
+      ctx.fillStyle = shadow;
+      ctx.arc(centreX, centreY, earthRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawOrbitsAndSatellites(time) {
+      satellites.forEach((sat, index) => {
+        sat.angle += sat.speed;
+        sat.pulse += 0.08;
+
+        const orbitRadius = earthRadius * sat.radius;
+        const tilt = sat.tilt;
+
+        ctx.save();
+        ctx.translate(centreX, centreY);
+        ctx.rotate(tilt);
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(126,231,255,0.08)";
+        ctx.lineWidth = 1;
+        ctx.ellipse(0, 0, orbitRadius, orbitRadius * 0.32, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const x = Math.cos(sat.angle) * orbitRadius;
+        const y = Math.sin(sat.angle) * orbitRadius * 0.32;
+        const depth = Math.sin(sat.angle);
+        const scale = depth > 0 ? 1.15 : 0.72;
+        const alpha = depth > 0 ? 1 : 0.42;
+
+        ctx.beginPath();
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = sat.colour;
+        ctx.fillStyle = sat.colour;
+        ctx.globalAlpha = alpha * (0.72 + Math.sin(sat.pulse) * 0.28);
+        ctx.arc(x, y, sat.size * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = alpha * 0.65;
+        ctx.strokeStyle = sat.colour;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x - 7 * scale, y);
+        ctx.lineTo(x + 7 * scale, y);
+        ctx.stroke();
+
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    function animate(time) {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      drawStars(time);
+      drawOrbitsAndSatellites(time);
+      drawEarth(time);
+
+      requestAnimationFrame(animate);
+    }
+
+    animate(0);
+  </script>
+</body>
+</html>
+EOF
