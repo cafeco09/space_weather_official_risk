@@ -1,7 +1,7 @@
 cat > .github/workflows/main.yml <<'EOF'
 name: Deploy GitHub Pages
 
-on:
+'on':
   push:
     branches:
       - main
