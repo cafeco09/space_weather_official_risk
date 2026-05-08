@@ -1,0 +1,6 @@
+satellite_name,altitude_km,velocity_km_s,kp_index,density_multiplier
+STARLINK-2984,534,7.61,5.3,1.17
+STARLINK-3001,532,7.62,5.1,1.14
+STARLINK-3042,529,7.63,5.4,1.21
+STARLINK-3120,536,7.60,4.9,1.12
+STARLINK-3211,531,7.64,5.3,1.17
