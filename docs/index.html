@@ -752,9 +752,11 @@
         ctx.fill();
       }
 
-      const cx = width * 0.35;
-      const cy = height * 0.45;
-      const r = Math.min(width, height) * 0.265;
+      const cx = width * 0.34;
+      const cy = height * 0.49;
+
+      const availableHeight = height - 170 - 260;
+      const r = Math.min(width * 0.18, availableHeight * 0.55);
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -763,7 +765,7 @@
         ctx.save();
         ctx.rotate((i / 13) * Math.PI * 2);
         ctx.beginPath();
-        ctx.ellipse(0, 0, r * (1.68 + Math.random() * 0.02), r * (0.42 + (i % 4) * 0.03), 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, r * (1.48 + Math.random() * 0.02), r * (0.36 + (i % 4) * 0.025), 0, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(96, 165, 250, ${0.16 + i * 0.005})`;
         ctx.lineWidth = 1;
         ctx.stroke();
