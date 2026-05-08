@@ -1,48 +1,23 @@
-cat > docs/index.html <<'EOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Space Weather Risk Globe</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <main class="layout">
-    <section class="left">
-      <p class="eyebrow">LEO Satellite Risk Intelligence</p>
-      <h1>Space Weather Risk Globe</h1>
-      <p class="subtitle">
-        Interactive orbital-risk visualisation for low Earth orbit satellites under atmospheric drag stress.
-      </p>
+cat > index.html <<'EOF'
+<div id="app">
+  <canvas id="scene"></canvas>
 
-      <div class="metrics">
-        <div><strong>64</strong><span>visual satellites</span></div>
-        <div><strong>3</strong><span>risk classes</span></div>
-        <div><strong>90m</strong><span>propagation window</span></div>
-      </div>
+  <section class="hud">
+    <p class="eyebrow">LEO Satellite Risk Intelligence</p>
+    <h1>Space Weather Risk Globe</h1>
+    <p>
+      Cinematic orbital-risk visualisation for low Earth orbit satellites under atmospheric drag stress.
+    </p>
 
-      <div class="legend">
-        <span><i class="low"></i> Low risk</span>
-        <span><i class="medium"></i> Medium risk</span>
-        <span><i class="high"></i> High risk</span>
-      </div>
-    </section>
-
-    <section class="stage">
-      <canvas id="globe"></canvas>
-      <div id="tooltip" class="tooltip"></div>
-    </section>
-  </main>
-
-  <section class="flow">
-    <div>Catalogue ingest</div>
-    <div>Atmosphere proxy</div>
-    <div>Parallel propagation</div>
-    <div>Risk scoring</div>
+    <div class="cards">
+      <div><strong>18</strong><span>satellites</span></div>
+      <div><strong>90m</strong><span>forecast window</span></div>
+      <div><strong>3</strong><span>risk classes</span></div>
+    </div>
   </section>
 
-  <script type="module" src="app.js"></script>
-</body>
-</html>
+  <div id="tooltip"></div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
 EOF
