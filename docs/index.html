@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>TERRA·LEO | Unified Space Weather</title>
+  <title>TERRA•LEO | Unified Space Weather Intelligence</title>
   <style>
     * {
       margin: 0;
@@ -12,7 +12,7 @@
     }
 
     body {
-      background: #03070e;
+      background: #03070f;
       font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
       height: 100vh;
       width: 100vw;
@@ -20,83 +20,82 @@
       color: #edf4fc;
     }
 
-    /* main app container – no scroll, widescreen dashboard */
+    /* main dashboard – no scroll, widescreen optimized */
     .dashboard {
       display: flex;
       flex-direction: column;
       height: 100vh;
       width: 100%;
-      background: radial-gradient(circle at 20% 30%, #07121f, #010407);
+      background: radial-gradient(circle at 15% 25%, #071221, #01060c);
       overflow: hidden;
     }
 
-    /* TOP BAR – sleek, low profile, no earth occlusion */
+    /* top bar – refined metrics size */
     .top-metrics {
       flex-shrink: 0;
       display: flex;
       flex-wrap: nowrap;
       justify-content: space-between;
-      gap: 6px;
-      padding: 12px 24px;
-      background: rgba(2, 9, 18, 0.68);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(70, 140, 210, 0.25);
+      gap: 8px;
+      padding: 12px 28px;
+      background: rgba(2, 9, 18, 0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(70, 140, 210, 0.28);
       z-index: 12;
       overflow-x: auto;
       scrollbar-width: none;
     }
     .metric-chip {
-      background: rgba(8, 24, 40, 0.55);
-      border-radius: 80px;
-      padding: 5px 16px;
+      background: rgba(8, 26, 46, 0.6);
+      border-radius: 60px;
+      padding: 6px 20px;
       display: inline-flex;
       align-items: baseline;
-      gap: 8px;
+      gap: 10px;
       white-space: nowrap;
-      border: 1px solid rgba(100, 170, 235, 0.2);
-      backdrop-filter: blur(5px);
+      border: 1px solid rgba(100, 170, 235, 0.25);
+      backdrop-filter: blur(4px);
       transition: all 0.1s;
     }
     .metric-label {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 500;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      color: #86aed5;
+      color: #98bbdf;
     }
     .metric-value {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.2px;
       line-height: 1;
     }
     .metric-sub {
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 500;
-      margin-left: 4px;
+      margin-left: 5px;
     }
-    .green { color: #4ade80; text-shadow: 0 0 4px #4ade8030; }
-    .amber { color: #fbbf24; text-shadow: 0 0 3px #fbbf2430; }
+    .green { color: #4ade80; text-shadow: 0 0 3px #4ade8030; }
+    .amber { color: #fbbf24; text-shadow: 0 0 2px #fbbf2430; }
     .cyan { color: #7bc5ff; }
 
-    /* MIDDLE SECTION: Earth + right panel — earth fully visible */
+    /* MIDDLE SECTION: Earth gets more space, right panel refined */
     .middle-area {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 330px;
-      gap: 20px;
-      padding: 16px 24px 12px 24px;
-      min-height: 0;  /* critical for flex child overflow */
+      grid-template-columns: 1fr 340px;
+      gap: 22px;
+      padding: 16px 28px 12px 28px;
+      min-height: 0;
       overflow: hidden;
     }
 
-    /* EARTH CONTAINER – no overlay, crisp */
+    /* earth container – larger, crisp */
     .earth-stage {
       background: #02070f;
-      border-radius: 32px;
-      backdrop-filter: blur(2px);
-      border: 1px solid rgba(70, 140, 210, 0.3);
-      box-shadow: 0 12px 28px -10px black;
+      border-radius: 36px;
+      border: 1px solid rgba(70, 140, 210, 0.4);
+      box-shadow: 0 18px 34px -12px black;
       overflow: hidden;
       position: relative;
       display: flex;
@@ -107,237 +106,241 @@
       width: 100%;
       height: 100%;
       display: block;
-      border-radius: 30px;
+      border-radius: 34px;
     }
 
-    /* RIGHT PANEL – slim, premium */
+    /* right panel – slight sizing adjustments */
     .satellite-detail {
-      background: rgba(2, 12, 24, 0.78);
-      backdrop-filter: blur(18px);
+      background: rgba(2, 12, 24, 0.8);
+      backdrop-filter: blur(20px);
       border-radius: 32px;
-      border: 1px solid rgba(80, 150, 225, 0.35);
-      padding: 20px 18px;
+      border: 1px solid rgba(80, 150, 225, 0.4);
+      padding: 22px 20px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       overflow-y: auto;
       scrollbar-width: thin;
-      box-shadow: 0 12px 24px -8px black;
+      box-shadow: 0 12px 28px -10px black;
     }
     .sat-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      border-bottom: 1px solid rgba(100, 180, 240, 0.25);
-      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(100, 180, 240, 0.3);
+      padding-bottom: 12px;
     }
     .sat-name {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
-      background: linear-gradient(120deg, #ffffff, #b3d6ff);
+      background: linear-gradient(125deg, #ffffff, #b8dbff);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      letter-spacing: -0.2px;
     }
     .status {
-      background: rgba(74, 222, 128, 0.12);
+      background: rgba(74, 222, 128, 0.15);
       border: 1px solid #4ade80;
       border-radius: 60px;
-      padding: 4px 12px;
-      font-size: 9px;
+      padding: 4px 14px;
+      font-size: 10px;
       font-weight: 700;
       color: #4ade80;
     }
     .sat-icon-deco {
       display: flex;
       justify-content: center;
-      gap: 18px;
-      background: rgba(20, 50, 80, 0.35);
-      border-radius: 48px;
+      gap: 24px;
+      background: rgba(20, 55, 90, 0.4);
+      border-radius: 60px;
       padding: 10px;
-      margin: 4px 0;
     }
     .info-line {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
+      font-size: 13px;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(70, 130, 200, 0.15);
+      border-bottom: 1px solid rgba(70, 130, 200, 0.2);
     }
     .info-label {
-      color: #8eb2d6;
-      font-weight: 470;
+      color: #9bbde3;
+      font-weight: 460;
     }
     .info-data {
-      font-weight: 530;
+      font-weight: 540;
       font-family: 'SF Mono', monospace;
     }
     .warning-data { color: #fbbf24; font-weight: 700; }
     .detail-button {
-      background: rgba(30, 70, 110, 0.6);
-      border: 1px solid #2f6d9b;
+      background: rgba(30, 75, 115, 0.7);
+      border: 1px solid #366f9f;
       border-radius: 40px;
       text-align: center;
-      padding: 10px;
+      padding: 12px;
       font-weight: 600;
-      font-size: 11px;
-      letter-spacing: 1px;
+      font-size: 12px;
+      letter-spacing: 0.8px;
       transition: 0.2s;
       cursor: default;
     }
 
-    /* BOTTOM DASHBOARD – charts, orbits, events (all visible without scrolling) */
+    /* BOTTOM DASHBOARD – fine-tuned spacing */
     .bottom-dash {
       flex-shrink: 0;
-      padding: 0 24px 20px 24px;
+      padding: 0 28px 22px 28px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .charts-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1.2fr;
-      gap: 16px;
+      grid-template-columns: 1fr 1fr 1.25fr;
+      gap: 18px;
     }
     .card {
-      background: rgba(4, 16, 28, 0.75);
-      backdrop-filter: blur(16px);
-      border-radius: 24px;
-      border: 1px solid rgba(70, 140, 210, 0.3);
-      padding: 12px 16px;
+      background: rgba(4, 16, 28, 0.78);
+      backdrop-filter: blur(18px);
+      border-radius: 26px;
+      border: 1px solid rgba(70, 140, 210, 0.35);
+      padding: 14px 18px;
     }
     .card-title {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 1.2px;
       text-transform: uppercase;
-      color: #8eb2da;
-      margin-bottom: 10px;
+      color: #96bade;
+      margin-bottom: 12px;
     }
     canvas.small-canvas {
       width: 100%;
-      height: 82px;
+      height: 84px;
       display: block;
     }
-    /* orbital distribution grid */
+    /* orbital distribution improved spacing */
     .orb-grid {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       justify-content: space-between;
-      margin: 10px 0 4px;
+      margin: 12px 0 6px;
     }
     .orb-col {
       flex: 1;
       text-align: center;
-      background: rgba(10, 30, 48, 0.5);
-      border-radius: 20px;
-      padding: 8px 3px;
+      background: rgba(10, 32, 52, 0.55);
+      border-radius: 24px;
+      padding: 10px 4px;
     }
     .inc-badge {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
-      background: #112c42;
+      background: #0f304a;
       display: inline-block;
-      padding: 2px 10px;
+      padding: 3px 12px;
       border-radius: 30px;
-      color: #cfebff;
-      margin-bottom: 10px;
+      color: #daf0ff;
+      margin-bottom: 12px;
     }
     .time-label-sm {
-      font-size: 7px;
+      font-size: 8px;
       font-weight: 600;
-      color: #698fb3;
-      margin: 6px 0 3px;
+      color: #7a9fc9;
+      margin: 8px 0 4px;
     }
     .dot-cluster {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 4px;
-      margin: 3px 0;
+      gap: 5px;
+      margin: 5px 0;
     }
     .dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
     }
-    .dot-current { background: #ffbc5e; box-shadow: 0 0 3px #ffbc5e; }
-    .dot-6h { background: #528fc2; }
-    .dot-12h { background: #386f99; }
-    .dot-18h { background: #23537a; }
+    .dot-current { background: #ffbc5e; box-shadow: 0 0 4px #ffbc5e; }
+    .dot-6h { background: #5b99cc; }
+    .dot-12h { background: #3f77a3; }
+    .dot-18h { background: #2a5a80; }
     .legend-inline {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin-top: 6px;
-      font-size: 7px;
+      gap: 16px;
+      margin-top: 8px;
+      font-size: 8px;
     }
     /* events & risk row */
     .events-risk {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 16px;
+      gap: 18px;
     }
     .event-table {
       width: 100%;
-      font-size: 9px;
+      font-size: 10px;
       border-collapse: collapse;
     }
     .event-table th {
       text-align: left;
-      color: #7aa5ce;
+      color: #8bb3db;
       font-weight: 600;
-      padding-bottom: 4px;
+      padding-bottom: 6px;
     }
     .event-table td {
-      padding: 5px 2px 4px 0;
+      padding: 7px 3px 5px 0;
       border-top: 1px solid rgba(80,140,210,0.2);
     }
     .sev-m { color: #fbbf24; font-weight: 600; }
     .risk-bars {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 12px;
     }
     .risk-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 9px;
+      gap: 12px;
+      font-size: 10px;
     }
     .risk-bullet {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
     }
-    /* no scroll anywhere */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #2f6d98; border-radius: 10px; }
     .satellite-detail::-webkit-scrollbar { width: 3px; }
+    
+    /* fine adjustments for ultra-wide */
+    @media (min-width: 1800px) {
+      .metric-value { font-size: 26px; }
+      .sat-name { font-size: 26px; }
+      .card-title { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
 <div class="dashboard">
-  <!-- TOP METRICS (no earth coverage) -->
+  <!-- TOP METRICS - slightly larger font, cleaner -->
   <div class="top-metrics">
-    <div class="metric-chip"><span class="metric-label">🛰️ SYS</span><span class="metric-value green">LEO·ACTIVE</span></div>
+    <div class="metric-chip"><span class="metric-label">🛸 SYS</span><span class="metric-value green">LEO·ACTIVE</span></div>
     <div class="metric-chip"><span class="metric-label">SATELLITES</span><span class="metric-value">42</span><span class="metric-sub green">tracked</span></div>
     <div class="metric-chip"><span class="metric-label">ALTITUDE</span><span class="metric-value">548</span><span class="metric-sub">km</span></div>
     <div class="metric-chip"><span class="metric-label">KP INDEX</span><span class="metric-value amber">5.3</span><span class="metric-sub amber">G2</span></div>
     <div class="metric-chip"><span class="metric-label">DRAG</span><span class="metric-value amber">MODERATE</span><span class="metric-sub">↑1.17x</span></div>
     <div class="metric-chip"><span class="metric-label">⚠️ RISK</span><span class="metric-value amber">3</span><span class="metric-sub">objects</span></div>
-    <div class="metric-chip"><span class="metric-label">UTC</span><span class="metric-value" style="font-size:15px; font-family: monospace;" id="utcLive">--:--:--</span></div>
+    <div class="metric-chip"><span class="metric-label">UTC</span><span class="metric-value" style="font-size:17px; font-family: monospace;" id="utcLive">--:--:--</span></div>
   </div>
 
   <!-- MIDDLE: EARTH + RIGHT PANEL (earth fully exposed) -->
   <div class="middle-area">
     <div class="earth-stage">
-      <canvas id="earthCanvas" width="800" height="500" style="width:100%; height:100%; object-fit: cover;"></canvas>
+      <canvas id="earthCanvas" width="900" height="520" style="width:100%; height:100%; object-fit: cover;"></canvas>
     </div>
     <div class="satellite-detail">
       <div class="sat-header">
@@ -345,8 +348,8 @@
         <span class="status">● ACTIVE</span>
       </div>
       <div class="sat-icon-deco">
-        <span style="font-size: 26px;">🛸</span>
-        <span style="font-size: 22px;">⚡</span>
+        <span style="font-size: 28px;">🛰️</span>
+        <span style="font-size: 24px;">⚡</span>
       </div>
       <div class="info-line"><span class="info-label">Altitude</span><span class="info-data">534 km</span></div>
       <div class="info-line"><span class="info-label">Inclination</span><span class="info-data">70.1°</span></div>
@@ -361,24 +364,24 @@
     </div>
   </div>
 
-  <!-- BOTTOM SECTION (all live data, no overflow) -->
+  <!-- BOTTOM CHARTS + ORBITAL + EVENTS (tweaked dimensions) -->
   <div class="bottom-dash">
     <div class="charts-row">
       <div class="card">
         <div class="card-title"><span>🌊 ATMOSPHERIC DENSITY</span><span class="amber">+17%</span></div>
-        <canvas id="densityChart" class="small-canvas" width="400" height="82"></canvas>
-        <div style="display: flex; justify-content: space-between; font-size: 7px; margin-top: 5px; color:#5e86ab;"><span>T-72h</span><span>T-48h</span><span>T-24h</span><span>NOW</span></div>
+        <canvas id="densityChart" class="small-canvas" width="500" height="84"></canvas>
+        <div style="display: flex; justify-content: space-between; font-size: 8px; margin-top: 6px; color:#6b92b9;"><span>T-72h</span><span>T-48h</span><span>T-24h</span><span>NOW</span></div>
       </div>
       <div class="card">
         <div class="card-title"><span>⚡ KP INDEX (3h)</span><span class="amber">5.3 moderate</span></div>
-        <canvas id="kpChart" class="small-canvas" width="400" height="82"></canvas>
-        <div style="display: flex; justify-content: space-between; font-size: 7px; margin-top: 5px; color:#5e86ab;"><span>18h</span><span>12h</span><span>6h</span><span>NOW</span></div>
+        <canvas id="kpChart" class="small-canvas" width="500" height="84"></canvas>
+        <div style="display: flex; justify-content: space-between; font-size: 8px; margin-top: 6px; color:#6b92b9;"><span>18h</span><span>12h</span><span>6h</span><span>NOW</span></div>
       </div>
       <div class="card">
         <div class="card-title"><span>🛰️ PLANE DISTRIBUTION</span><span>inclination clusters</span></div>
         <div id="orbitalGridComp" class="orb-grid"></div>
         <div class="legend-inline">
-          <span><div class="dot dot-current" style="display: inline-block;"></div> Now</span>
+          <span><div class="dot dot-current" style="display: inline-block; vertical-align: middle;"></div> Now</span>
           <span><div class="dot dot-6h" style="display: inline-block;"></div> 6h</span>
           <span><div class="dot dot-12h" style="display: inline-block;"></div> 12h</span>
           <span><div class="dot dot-18h" style="display: inline-block;"></div> 18h</span>
@@ -404,7 +407,7 @@
           <div class="risk-item"><div class="risk-bullet" style="background:#facc15;"></div><span>MODERATE</span><span style="margin-left:auto;">1.10–1.30x</span></div>
           <div class="risk-item"><div class="risk-bullet" style="background:#fb923c;"></div><span>ELEVATED</span><span style="margin-left:auto;">1.30–1.60x</span></div>
           <div class="risk-item"><div class="risk-bullet" style="background:#ef4444;"></div><span>HIGH</span><span style="margin-left:auto;">&gt;1.60x</span></div>
-          <div class="risk-item" style="margin-top: 4px;"><span style="font-size:8px;">Current: 1.17x → moderate regime</span></div>
+          <div class="risk-item" style="margin-top: 6px;"><span style="font-size:9px;">Current: 1.17x → moderate regime</span></div>
         </div>
       </div>
     </div>
@@ -413,7 +416,7 @@
 
 <script>
   (function(){
-    // ----- EARTH CANVAS (no orbit lines, only satellite dots + Earth) -----
+    // ---- EARTH CANVAS - NO ORBIT LINES, only satellite dots - size adaptive ----
     const canvas = document.getElementById('earthCanvas');
     let ctx = canvas.getContext('2d');
     let container = canvas.parentElement;
@@ -428,7 +431,7 @@
       drawEarthAndDots();
     }
     
-    // 42 satellites with risk colors, no orbital rings
+    // 42 satellites; no orbit lines, just dynamic dots
     const satellites = [];
     for (let i = 0; i < 42; i++) {
       let risk = 'low';
@@ -436,36 +439,38 @@
       else if (i < 12) risk = 'mid';
       satellites.push({
         angle: Math.random() * Math.PI * 2,
-        speed: 0.0012 + Math.random() * 0.0025,
-        radiusMult: 1.2 + Math.random() * 0.9,
-        tilt: -1.4 + Math.random() * 2.8,
+        speed: 0.0011 + Math.random() * 0.0024,
+        radiusMult: 1.18 + Math.random() * 0.92,
+        tilt: -1.5 + Math.random() * 3.0,
         risk: risk
       });
     }
     
     let animFrame = 0;
+    let starField = null;
+    function initStars() {
+      starField = Array.from({ length: 420 }, () => ({ x: Math.random() * 2000, y: Math.random() * 1500, r: Math.random() * 1.4 + 0.3, alpha: 0.3 + Math.random() * 0.7 }));
+    }
+    initStars();
+    
     function drawEarthAndDots() {
       if (!ctx || width === 0 || height === 0) return;
       ctx.clearRect(0, 0, width, height);
       
-      // stars background (relative to canvas)
-      for (let i = 0; i < 280; i++) {
-        if (!window.starCache) {
-          window.starCache = Array.from({ length: 380 }, () => ({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 1.5 + 0.3, alpha: 0.3 + Math.random() * 0.7 }));
-        }
-        let s = window.starCache[i % window.starCache.length];
+      // stars dynamic
+      for (let i = 0; i < starField.length; i++) {
+        let s = starField[i];
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 245, 210, ${s.alpha * 0.5})`;
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 248, 220, ${s.alpha * 0.65})`;
+        ctx.arc((s.x + animFrame * 0.2) % width, (s.y + animFrame * 0.08) % height, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
       
-      // Earth center (slightly left-biased but visible)
       const centerX = width * 0.5;
       const centerY = height * 0.52;
-      const earthRadius = Math.min(width * 0.32, height * 0.36, 210);
+      const earthRadius = Math.min(width * 0.32, height * 0.38, 210);
       
-      // draw satellite dots only (no orbit paths)
+      // satellite dots – no orbital traces
       for (let sat of satellites) {
         sat.angle += sat.speed;
         const rx = sat.radiusMult * earthRadius;
@@ -476,55 +481,54 @@
         const xDot = Math.cos(sat.angle) * rx;
         const yDot = Math.sin(sat.angle) * ry;
         let dotColor = '#b7dcff';
-        if (sat.risk === 'high') dotColor = '#ff7a74';
-        else if (sat.risk === 'mid') dotColor = '#ffb45a';
-        ctx.shadowBlur = sat.risk === 'high' ? 6 : 2;
+        if (sat.risk === 'high') dotColor = '#ff7a6e';
+        else if (sat.risk === 'mid') dotColor = '#ffbc6e';
+        ctx.shadowBlur = sat.risk === 'high' ? 7 : 2.5;
         ctx.shadowColor = dotColor;
         ctx.fillStyle = dotColor;
         ctx.beginPath();
-        ctx.arc(xDot, yDot, sat.risk === 'high' ? 3.2 : 2.2, 0, Math.PI*2);
+        ctx.arc(xDot, yDot, sat.risk === 'high' ? 3.5 : 2.4, 0, Math.PI*2);
         ctx.fill();
         ctx.restore();
       }
       ctx.shadowBlur = 0;
       
-      // draw Earth with glow and abstract continents
-      const grad = ctx.createRadialGradient(centerX - 8, centerY - 6, 5, centerX, centerY, earthRadius);
-      grad.addColorStop(0, '#0c3c64');
-      grad.addColorStop(0.65, '#1b6596');
-      grad.addColorStop(1, '#02121f');
+      // Earth gradient and artistic relief
+      const grad = ctx.createRadialGradient(centerX - 12, centerY - 10, 6, centerX, centerY, earthRadius);
+      grad.addColorStop(0, '#0e416b');
+      grad.addColorStop(0.6, '#1f6a9b');
+      grad.addColorStop(1, '#021826');
       ctx.beginPath();
       ctx.arc(centerX, centerY, earthRadius, 0, Math.PI*2);
       ctx.fillStyle = grad;
       ctx.fill();
       
-      // soft landmass suggestion
-      ctx.globalAlpha = 0.28;
-      ctx.fillStyle = '#b9e0a6';
-      for (let i=0;i<16;i++) {
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#c9e6b4';
+      for (let i=0;i<18;i++) {
         ctx.beginPath();
-        let offX = Math.sin(animFrame * 0.002 + i*1.2) * earthRadius * 0.45;
-        let offY = Math.cos(animFrame * 0.0018 + i*0.8) * earthRadius * 0.38;
+        let offX = Math.sin(animFrame * 0.0025 + i*1.4) * earthRadius * 0.48;
+        let offY = Math.cos(animFrame * 0.002 + i*0.9) * earthRadius * 0.4;
         ctx.ellipse(centerX + offX, centerY + offY, earthRadius*0.09, earthRadius*0.07, 0, 0, Math.PI*2);
         ctx.fill();
       }
       ctx.globalAlpha = 0.45;
-      ctx.fillStyle = '#f5e6b0';
-      for (let i=0;i<34;i++) {
+      ctx.fillStyle = '#f7eabe';
+      for (let i=0;i<38;i++) {
         ctx.beginPath();
-        ctx.arc(centerX + (Math.sin(i*5.2 + animFrame*0.003) * earthRadius*0.41), centerY + (Math.cos(i*3.7) * earthRadius*0.35), 1.4, 0, Math.PI*2);
+        ctx.arc(centerX + (Math.sin(i*5.8 + animFrame*0.003) * earthRadius*0.43), centerY + (Math.cos(i*4.2) * earthRadius*0.36), 1.5, 0, Math.PI*2);
         ctx.fill();
       }
       ctx.globalAlpha = 0.2;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, earthRadius + 6, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(90, 170, 240, 0.12)';
+      ctx.arc(centerX, centerY, earthRadius + 7, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(100, 180, 250, 0.12)';
       ctx.fill();
       ctx.globalAlpha = 1;
     }
     
     function animateEarth() {
-      animFrame += 18;
+      animFrame += 16;
       drawEarthAndDots();
       requestAnimationFrame(animateEarth);
     }
@@ -536,7 +540,7 @@
     resizeEarthCanvas();
     animateEarth();
     
-    // ----- UTC CLOCK -----
+    // UTC Clock
     function updateUTCLive() {
       const now = new Date();
       const timeStr = now.toISOString().slice(11, 19);
@@ -546,7 +550,7 @@
     setInterval(updateUTCLive, 1000);
     updateUTCLive();
     
-    // ----- DENSITY CHART (elegant line)-----
+    // Density Chart (line)
     function drawDensityCurve() {
       const canv = document.getElementById('densityChart');
       if (!canv) return;
@@ -555,7 +559,7 @@
       const ctx2 = canv.getContext('2d');
       const densityData = [0.82,0.79,0.85,0.90,0.87,0.93,0.96,1.00,1.03,0.99,1.02,1.05,1.08,1.12,1.09,1.13,1.16,1.12,1.18,1.21,1.24,1.20,1.27,1.30,1.34,1.37,1.32,1.39,1.43,1.47,1.50];
       const maxV = 1.62;
-      const padL = 24, padR = 8, padT = 8, padB = 12;
+      const padL = 28, padR = 8, padT = 8, padB = 12;
       const step = (w - padL - padR) / (densityData.length - 1);
       ctx2.clearRect(0,0,w,h);
       ctx2.beginPath();
@@ -566,7 +570,7 @@
       }
       ctx2.lineTo(w-padR, h-padB);
       ctx2.lineTo(padL, h-padB);
-      ctx2.fillStyle = 'rgba(60, 170, 255, 0.1)';
+      ctx2.fillStyle = 'rgba(60, 180, 255, 0.12)';
       ctx2.fill();
       ctx2.beginPath();
       for (let i=0;i<densityData.length;i++) {
@@ -575,13 +579,13 @@
         if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
       }
       ctx2.strokeStyle = '#5bb4ff';
-      ctx2.lineWidth = 1.8;
+      ctx2.lineWidth = 2;
       ctx2.stroke();
       let lastX = padL + (densityData.length-1)*step;
       let lastY = h - padB - (densityData[densityData.length-1]/maxV)*(h - padT - padB);
       ctx2.fillStyle = '#ffb85c';
       ctx2.beginPath();
-      ctx2.arc(lastX, lastY, 3, 0, Math.PI*2);
+      ctx2.arc(lastX, lastY, 3.2, 0, Math.PI*2);
       ctx2.fill();
     }
     
@@ -593,12 +597,12 @@
       const ctx2 = canv.getContext('2d');
       const kpVals = [1.2,1.5,1.8,2.4,2.1,1.9,2.8,3.2,3.5,2.9,3.8,4.0,3.5,4.2,4.5,3.8,4.8,4.2,3.5,3.8,4.5,5.0,4.8,5.3];
       const maxK = 9;
-      const padL = 24, padR = 8, padT = 8, padB = 12;
-      const barW = (w - padL - padR) / kpVals.length - 1.2;
+      const padL = 28, padR = 8, padT = 8, padB = 12;
+      const barW = (w - padL - padR) / kpVals.length - 1.5;
       ctx2.clearRect(0,0,w,h);
       for (let i=0;i<kpVals.length;i++) {
         let barH = (kpVals[i]/maxK)*(h - padT - padB);
-        let x = padL + i*(barW+1.2);
+        let x = padL + i*(barW+1.5);
         let y = h - padB - barH;
         let r=80,g=190,b=255;
         if(kpVals[i]>=5){ r=255; g=140; b=50; }
@@ -610,7 +614,7 @@
       ctx2.shadowBlur = 0;
     }
     
-    // orbital plane distribution (aesthetic dot clusters)
+    // orbital distribution (slightly larger dots)
     function buildOrbitalGrid() {
       const container = document.getElementById('orbitalGridComp');
       if (!container) return;
