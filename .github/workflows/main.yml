@@ -1,6 +1,4 @@
-mkdir -p .github/workflows
-
-cat > .github/workflows/pages.yml <<'EOF'
+cat > .github/workflows/main.yml <<'EOF'
 name: Deploy GitHub Pages
 
 on:
